@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <stdio.h>
+#include <errno.h>
 using namespace std;
 
 string Shader::GetTypeName()
@@ -70,14 +72,21 @@ bool Shader::LoadTextFile()
 {
 	sourceCode = "";
 	string line;
-	fstream file(filePath.c_str(), std::ios::in);
-	if (!file.is_open())
+	ifstream file;
+	file.open(filePath.c_str());
+	if (file.fail())
+	{
+		char error[1024];
+		strerror_s(error, 1024, errno);
+		cout << error << "\n";
 		return false;
+	}
 	while (file.good())
 	{
 		std::getline(file, line);
 		sourceCode += line + '\n';
 	}
+	file.close();
 	return true;
 }
 

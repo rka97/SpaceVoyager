@@ -1,7 +1,9 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "glm/glm.hpp"
+#include "Shader.h"
+#include "Material.h"
+#include "glm\glm.hpp"
 using namespace std;
 
 struct Vertex {
@@ -12,19 +14,13 @@ struct Vertex {
 	glm::vec3 Bitangent;
 };
 
-struct Texture {
-	unsigned int id;
-	string type;
-	string path;
-};
-
 class Mesh
 {
 public:
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;
-	vector<Texture> textures;
+	GLuint vertexArrayObjectID;
 
-	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures);
-	void Draw();
+	Mesh(vector<Vertex> vertices, vector<unsigned int> indices);
+	void Draw(Shader& vertexShader);	
 };

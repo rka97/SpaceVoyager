@@ -6,6 +6,18 @@
 #include "ShaderProgram.h"
 #include <iostream>
 using namespace std;
+using glm::vec3;
+using glm::vec4;
+
+struct Vertex
+{
+	glm::vec3 Position;
+	glm::vec4 Color;
+	Vertex(const vec3& position, const vec4& color)
+		: Position(position), Color(color)
+	{}
+};
+
 ShaderProgram prog;
 GLuint vertexarray = 0;
 GLuint vertexbuffer = 0;
@@ -13,6 +25,76 @@ GLuint vertexbuffer = 0;
 GLint uniformlocation_Model = -1;
 GLint uniformlocation_View = -1;
 GLint uniformlocation_Projection = -1;
+
+#include "Camera.h"
+Camera cam;
+SceneObject triangle;
+void Graphics::DirtyInitialize()
+{
+	prog.Initialize();
+	prog.AddAndCompileShader("Shaders\triangle2.vert", 'v');
+	prog.AddAndCompileShader("Shaders\triangle1.frag", 'f');
+	prog.LinkProgram();
+
+	prog.AddParameter("Model", 1, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	prog.AddParameter("View", 2, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	prog.AddParameter("Projection", 3, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	prog.AddParameter("in_position", 0, 1, SP_VEC3, GLSL_VAR_IN);
+	prog.AddParameter("in_color", 1, 1, SP_VEC4, GLSL_VAR_IN);
+
+
+	glBindVertexArray(vertexarray);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, Position)));
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, Color)));
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glBindVertexArray(0);
+
+	/* setup vertexbuffer */
+	vector<Vertex> vertices;
+	vertices.push_back(Vertex(vec3(0, 0, 0), vec4(1, 0, 0, 1)));
+	vertices.push_back(Vertex(vec3(1, 0, 0), vec4(0, 1, 0, 1)));
+	vertices.push_back(Vertex(vec3(0, 1, 0), vec4(0, 0, 1, 1)));
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	/* put the camera at the positive z-axis */
+	cam.SetPosition(glm::vec3(0, 0, 5));
+
+	/* turn the camera back to the origin */
+	cam.RotateAroundUp(glm::radians(180.0f));
+}
+
+
+void Graphics::DirtyRender()
+{
+	/* draw triangles */
+
+	float aspectratio = (float)frameBufferSize.x / frameBufferSize.y;
+
+	mat4 Model = triangle.GetTransformationMatrix();
+	mat4 View = cam.GetViewMatrix();
+	mat4 Projection = cam.GetProjectionMatrix(aspectratio);
+
+	prog.SetParameter("Model", ((void*)&Model));
+	prog.SetParameter("View", ((void*)&View));
+	prog.SetParameter("Projection", ((void*)&Projection));
+
+
+	/* clear framebuffer */
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	/* draw triangle */
+	prog.UseProgram();
+	glBindVertexArray(vertexarray);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
 
 Graphics::Graphics()
 {
@@ -29,30 +111,13 @@ void Graphics::Render()
 	DirtyRender();
 }
 
-void Graphics::DirtyRender()
-{
-	/* draw triangles */
-	prog.UseProgram();
-	glBindVertexArray(0);
-	glUseProgram(0);
-}
-
-void Graphics::DirtyInitialize()
-{
-
-	prog.Initialize();
-	prog.AddAndCompileShader("Shaders\triangle1.vert", 'v');
-	prog.AddAndCompileShader("Shaders\triangle1.frag", 'f');
-	prog.LinkProgram();
-
-}
-
 void Graphics::Initialize(unsigned int width, unsigned int height)
 {
 	PrintContextInfo();
 	Resize(width, height);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	DirtyInitialize();
 }
 
 void Graphics::Resize(unsigned int width, unsigned int height)
