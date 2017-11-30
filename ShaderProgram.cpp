@@ -102,7 +102,7 @@ void ShaderProgram::RemoveShader(string path)
 {
 	for (vector<Shader*>::iterator it = shaderList.begin(); it != shaderList.end(); it++)
 	{
-		if ((*it)->filePath == path)
+		if ((*it)->GetPath() == path)
 		{
 			shaderList.erase(it);
 		}

@@ -17,6 +17,7 @@ public:
 	bool Compile();
 	void DeleteCompiledObject();
 	const GLuint GetShaderID() const;
+	const string GetPath() const;
 
 private:
 	string filePath;

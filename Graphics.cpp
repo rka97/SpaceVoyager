@@ -41,34 +41,9 @@ void Graphics::DirtyInitialize()
 {
 
 	prog.Initialize();
-	prog.AddAndCompileShader("triangle1.vert", 'v');
-	prog.AddAndCompileShader("triangle1.frag", 'f');
+	prog.AddAndCompileShader("Shaders\triangle1.vert", 'v');
+	prog.AddAndCompileShader("Shaders\triangle1.frag", 'f');
 	prog.LinkProgram();
-
-
-	/* query uniform locations */
-	uniformlocation_Model = glGetUniformLocation(program, "Model");
-	uniformlocation_View = glGetUniformLocation(program, "View");
-	uniformlocation_Projection = glGetUniformLocation(program, "Projection");
-
-	/* setup vertexarray */
-	glBindVertexArray(vertexarray);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, Position)));
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, Color)));
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glBindVertexArray(0);
-
-	/* setup vertexbuffer */
-	vector<Vertex> vertices;
-	vertices.push_back(Vertex(vec3(0, 0, 0), vec4(1, 0, 0, 1)));
-	vertices.push_back(Vertex(vec3(1, 0, 0), vec4(0, 1, 0, 1)));
-	vertices.push_back(Vertex(vec3(0, 1, 0), vec4(0, 0, 1, 1)));
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 }
 

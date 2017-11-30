@@ -129,6 +129,11 @@ const GLuint Shader::GetShaderID() const
 	return shaderID;
 }
 
+const string Shader::GetPath() const
+{
+	return filePath;
+}
+
 string Shader::GetInfoLog()
 {
 	if (glIsShader(shaderID))
