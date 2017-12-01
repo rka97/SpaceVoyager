@@ -25,7 +25,8 @@ ShaderProgram::~ShaderProgram()
 
 bool ShaderProgram::Initialize()
 {
-	programID = glCreateProgram();
+	if (programID == 0)
+		programID = glCreateProgram();
 	return (programID == 0);
 }
 
@@ -255,45 +256,45 @@ int ShaderProgram::GetParameterLocation(string name)
 
 void ShaderProgram::SetBool(int location, int count, const bool* value)
 {
-	glUniform1iv(location, count, (const int*)value);
+	glProgramUniform1iv(programID, location, count, (const int*)value);
 }
 
 void ShaderProgram::SetInt(int location, int count, const GLint* value)
 {
-	glUniform1iv(location, count, value);
+	glProgramUniform1iv(programID, location, count, value);
 }
 
 void ShaderProgram::SetFloat(int location, int count, const GLfloat* value)
 {
-	glUniform1fv(location, count, value);
+	glProgramUniform1fv(programID, location, count, value);
 }
 
 void ShaderProgram::SetVec2(int location, int count, const glm::vec2* value)
 {
-	glUniform2fv(location, count, glm::value_ptr(*value));
+	glProgramUniform2fv(programID, location, count, glm::value_ptr(*value));
 }
 
 void ShaderProgram::SetVec3(int location, int count, const glm::vec3* value)
 {
-	glUniform3fv(location, count, glm::value_ptr(*value));
+	glProgramUniform3fv(programID, location, count, glm::value_ptr(*value));
 }
 
 void ShaderProgram::SetVec4(int location, int count, const glm::vec4* value)
 {
-	glUniform4fv(location, count, glm::value_ptr(*value));
+	glProgramUniform4fv(programID, location, count, glm::value_ptr(*value));
 }
 
 void ShaderProgram::SetMat2(int location, int count, const glm::mat2* value)
 {
-	glUniformMatrix2fv(location, count, GL_FALSE, glm::value_ptr(*value));
+	glProgramUniformMatrix2fv(programID, location, count, GL_FALSE, glm::value_ptr(*value));
 }
 
 void ShaderProgram::SetMat3(int location, int count, const glm::mat3* value)
 {
-	glUniformMatrix3fv(location, count, GL_FALSE, glm::value_ptr(*value));
+	glProgramUniformMatrix3fv(programID, location, count, GL_FALSE, glm::value_ptr(*value));
 }
 
 void ShaderProgram::SetMat4(int location, int count, const glm::mat4* value)
 {
-	glUniformMatrix4fv(location, count, GL_FALSE, glm::value_ptr(*value));
+	glProgramUniformMatrix4fv(programID, location, count, GL_FALSE, glm::value_ptr(*value));
 }

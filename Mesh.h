@@ -10,17 +10,22 @@ struct Vertex {
 	glm::vec3 position;
 	glm::vec3 normal;
 	glm::vec2 textureCoordinates;
-	glm::vec3 Tangent;
-	glm::vec3 Bitangent;
+	glm::vec3 tangent;
+	glm::vec3 bitangent;
 };
 
 class Mesh
 {
 public:
+	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, Material* mat);
+	Mesh(const Mesh& mesh);
+	void Initialize();
+	void Draw();
+private:
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;
-	GLuint vertexArrayObjectID;
-
-	Mesh(vector<Vertex> vertices, vector<unsigned int> indices);
-	void Draw(Shader& vertexShader);	
+	unsigned int vertexArrayObjectID;
+	unsigned int vertexBufferObjectID;
+	unsigned int elementBufferObjectID;
+	Material* material;
 };

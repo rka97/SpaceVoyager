@@ -56,6 +56,7 @@ struct ShaderParameter
 
 class ShaderProgram
 {
+	friend class Material;
 public:
 	ShaderProgram();
 	~ShaderProgram();
