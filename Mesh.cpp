@@ -16,6 +16,7 @@ Mesh::Mesh(const Mesh & mesh)
 	this->vertices = mesh.vertices;
 	this->indices = mesh.indices;
 	this->material = mesh.material;
+	this->Initialize();
 }
 
 void Mesh::Initialize()
@@ -39,7 +40,7 @@ void Mesh::Initialize()
 	// set the vertex attribute pointers
 	GLint attribLocation = 0;
 	attribLocation = material->GetParameterLocation("in_position");
-	if (attribLocation == 0)
+	if (attribLocation == -1)
 	{
 		cout << "ERROR: attribute in_position not found.\n";
 		return;
@@ -47,7 +48,7 @@ void Mesh::Initialize()
 	glVertexAttribPointer(attribLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
 	glEnableVertexAttribArray(attribLocation);
 	attribLocation = material->GetParameterLocation("in_normal");
-	if (attribLocation == 0)
+	if (attribLocation == -1)
 	{
 		cout << "ERROR: attribute in_normal not found.\n";
 		return;
@@ -55,7 +56,7 @@ void Mesh::Initialize()
 	glVertexAttribPointer(attribLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 	glEnableVertexAttribArray(attribLocation);
 	attribLocation = material->GetParameterLocation("in_texCoordinates");
-	if (attribLocation == 0)
+	if (attribLocation == -1)
 	{
 		cout << "ERROR: attribute in_texCoordinates not found.\n";
 		return;
@@ -84,7 +85,7 @@ void Mesh::Draw()
 		return;
 	}
 	
-	material->BindTextures();
+	material->ActivateMaterial();
 
 	// draw mesh
 	glBindVertexArray(vertexArrayObjectID);

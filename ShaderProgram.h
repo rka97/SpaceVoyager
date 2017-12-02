@@ -29,6 +29,7 @@ enum ParameterType
 	SP_MAT2,
 	SP_MAT3,
 	SP_MAT4,
+	SP_SAMPLER2D,
 	SP_END
 };
 

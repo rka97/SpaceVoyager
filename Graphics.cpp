@@ -2,33 +2,24 @@
 #include <GL\glew.h>
 #include "GLFW\glfw3.h"
 #include <glm\glm.hpp>
+#include <glm\gtc\matrix_transform.hpp>
 #include "Graphics.h"
 #include "ShaderProgram.h"
+#include "Model.h"
 #include <iostream>
 using namespace std;
 using glm::vec3;
 using glm::vec4;
 
-struct Vertex
-{
-	glm::vec3 Position;
-	glm::vec4 Color;
-	Vertex(const vec3& position, const vec4& color)
-		: Position(position), Color(color)
-	{}
-};
-
 ShaderProgram prog;
 GLuint vertexarray = 0;
 GLuint vertexbuffer = 0;
 
-GLint uniformlocation_Model = -1;
-GLint uniformlocation_View = -1;
-GLint uniformlocation_Projection = -1;
-
 #include "Camera.h"
 Camera cam;
-SceneObject triangle;
+Material* mat;
+Model* shipModel;
+
 void Graphics::DirtyInitialize()
 {
 	glGenVertexArrays(1, &vertexarray);
@@ -39,36 +30,32 @@ void Graphics::DirtyInitialize()
 	prog.AddAndCompileShader("Shaders\\triangle1.frag", 'f');
 	prog.LinkProgram();
 
-	prog.AddParameter("Model", 0, 1, SP_MAT4, GLSL_VAR_UNIFORM);
-	prog.AddParameter("View", 4, 1, SP_MAT4, GLSL_VAR_UNIFORM);
-	prog.AddParameter("Projection", 8, 1, SP_MAT4, GLSL_VAR_UNIFORM);
-	prog.AddParameter("in_position", 0, 1, SP_VEC3, GLSL_VAR_IN);
-	prog.AddParameter("in_color", 1, 1, SP_VEC4, GLSL_VAR_IN);
+	prog.AddParameter("ModelView", 0, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	prog.AddParameter("Projection", 1, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	prog.AddParameter("ModelViewNormal", 2, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	prog.AddParameter("ModelViewProjection", 3, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	prog.AddParameter("texture_diffuse1", 12, 1, SP_SAMPLER2D, GLSL_VAR_UNIFORM);
+	prog.AddParameter("light.position", 13, 1, SP_VEC4, GLSL_VAR_UNIFORM);
+	prog.AddParameter("light.intensity", 14, 1, SP_VEC3, GLSL_VAR_UNIFORM);
+	prog.AddParameter("material.Ka", 15, 1, SP_VEC3, GLSL_VAR_UNIFORM);
+	prog.AddParameter("material.Kd", 16, 1, SP_VEC3, GLSL_VAR_UNIFORM);
 
-	glBindVertexArray(vertexarray);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glVertexAttribPointer(prog.GetParameterLocation("in_position"), 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, Position)));
-	glVertexAttribPointer(prog.GetParameterLocation("in_color"), 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, Color)));
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glBindVertexArray(0);
-	CheckForErrors();
-	/* setup vertexbuffer */
-	vector<Vertex> vertices;
-	vertices.push_back(Vertex(vec3(0, 0, 0), vec4(1, 0, 0, 1)));
-	vertices.push_back(Vertex(vec3(1, 0, 0), vec4(0, 1, 0, 1)));
-	vertices.push_back(Vertex(vec3(0, 1, 0), vec4(0, 0, 1, 1)));
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	prog.AddParameter("in_position", 0, 1, SP_VEC3, GLSL_VAR_IN);
+	prog.AddParameter("in_normal", 1, 1, SP_VEC3, GLSL_VAR_IN);
+	prog.AddParameter("in_texCoordinates", 2, 1, SP_VEC2, GLSL_VAR_IN);
+
+	mat = new Material("Ship Material", &prog);
+	mat->Initialize();
+
+	shipModel = new Model("Ship", "corvette/Corvette-F3.obj", mat, false);
+
 	/* put the camera at the positive z-axis */
 	cam.SetPosition(glm::vec3(0, 0, 5));
 
 	/* turn the camera back to the origin */
 	cam.RotateAroundUp(glm::radians(180.0f));
 
-	triangle.SetPosition(glm::vec3(0, 0, 0));
 	CheckForErrors();
 }
 
@@ -78,19 +65,32 @@ void Graphics::DirtyRender()
 	/* draw triangles */
 	float aspectratio = (float)frameBufferSize.x / frameBufferSize.y;
 
-	mat4 Model = triangle.GetTransformationMatrix();
+	glm::mat4 Model(1.0f);
+	Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, -2.0f));
+	Model = glm::scale(Model, glm::vec3(0.002f));
+	static float i = 0.0f;
+	i++;
+	//Model = glm::rotate(Model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	Model = glm::rotate(Model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	//Model = glm::rotate(Model, (i-25)/1000, glm::vec3(0.0f, 1.0f, 0.0f));
 	mat4 View = cam.GetViewMatrix();
+	mat4 ModelView = View * Model;
+	mat4 ModelViewNormal = glm::transpose(glm::inverse(ModelView));
 	mat4 Projection = cam.GetProjectionMatrix(aspectratio);
+	mat4 ModelViewProjection = Projection * ModelView;
 
-	prog.SetParameter("Model", ((void*)&Model));
-	prog.SetParameter("View", ((void*)&View));
+	prog.SetParameter("ModelView", ((void*)&ModelView));
 	prog.SetParameter("Projection", ((void*)&Projection));
+	prog.SetParameter("ModelViewNormal", ((void*)&ModelViewNormal));
+	prog.SetParameter("ModelViewProjection", ((void*)&ModelViewProjection));
+	vec3 lightPosition = vec3(View * vec4(10.0f * sin(i / 1000), -10.0f, 10.0f * sin(i/1000), 1.0f));
+	prog.SetParameter("light.position", &lightPosition);
+	prog.SetParameter("light.intensity", &(glm::vec3(1.0f, 1.0f, 1.0f)));
+	prog.SetParameter("material.Ka", &(glm::vec3(0.1f, 0.1f, 0.1f)));
+	prog.SetParameter("material.Kd", &(glm::vec3(1.0f, 1.0f, 1.0f)));
 
-	/* draw triangle */
-	prog.UseProgram();
-	glBindVertexArray(vertexarray);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	glBindVertexArray(0);
+	/* draw model */
+	shipModel->Draw();
 	glUseProgram(0);
 	CheckForErrors();
 }

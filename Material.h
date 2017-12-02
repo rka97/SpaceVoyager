@@ -18,12 +18,15 @@ class Material
 public:
 	Material(string name, ShaderProgram* prog);
 	Material(string name, ShaderProgram* prog, vector<Texture> textures);
+	Material(const Material& mat);
 	~Material();
 	bool Initialize();
 	bool AddTexture(string path, string type);
 	bool AddTexture(Texture& texToAdd);
+	void SetTextures(vector<Texture>& tex);
+	void ActivateMaterial();
 	void BindTextures();
-	bool SetParameterValue(string parameterName, const void* parameterValue);
+	bool SetParameterValue(string parameterName, void* parameterValue);
 	int	 GetParameterLocation(string name);
 private:
 	string name;

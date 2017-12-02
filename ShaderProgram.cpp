@@ -168,15 +168,18 @@ bool ShaderProgram::SetParameter(string name, const void * value)
 	if (!is_Linked)
 	{
 		cout << "Error in ShaderProgram::SetParameter: trying to set input parameter without linking first!\n";
+		return false;
 	}
 	if (value == NULL)
 	{
 		cout << "Error in ShaderProgram::SetParameter: trying to set input parameter to NULL!\n";
+		return false;
 	}
 	map<string, ShaderParameter>::const_iterator it = inputParameters.find(name);
 	if (it == inputParameters.end())
 	{
 		cout << "Error in ShaderProgram::SetParameter: parameter named " << name << " not found in input parameters!\n";
+		return false;
 	}
 	if (it->second.glslVarType == GLSL_VAR_UNIFORM)
 	{
@@ -216,6 +219,10 @@ bool ShaderProgram::SetParameter(string name, const void * value)
 			break;
 		case SP_MAT4:
 			SetMat4(it->second.location, it->second.count, (const glm::mat4*) value);
+			return true;
+			break;
+		case SP_SAMPLER2D:
+			SetInt(it->second.location, it->second.count, (const GLint*)value);
 			return true;
 			break;
 		case SP_NULL:
