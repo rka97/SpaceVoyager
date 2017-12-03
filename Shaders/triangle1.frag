@@ -87,19 +87,19 @@ float IsEdge(in vec2 coords){
 void main()
 {
 	vec4 texColor = texture(texture_diffuse1, texCoordinates); 
+
 	/* For a retro style: enable this. colorLevels^3 colors only! */
-	/*
-	const int colorLevels = 16;
+	const int colorLevels = 10;
 	const float colorScaleFactor = 1.0 / colorLevels;
 	texColor.x = floor(texColor.x * colorLevels) * colorScaleFactor;
 	texColor.y = floor(texColor.y * colorLevels) * colorScaleFactor;
 	texColor.z = floor(texColor.z * colorLevels) * colorScaleFactor;
-	*/
+	
 	vec4 toonShadingColor = vec4(ToonShade(), 1.0);
 	float val_isEdge = 1 - IsEdge(texCoordinates);
 	vec4 edge_clr = vec4(val_isEdge, val_isEdge, val_isEdge, 1.0);
-	if (val_isEdge < 0.1)
+	if (val_isEdge < 0.3)
 		out_color = edge_clr;
 	else
-		out_color = toonShadingColor * texColor;
+		out_color = toonShadingColor * texColor * edge_clr;
 }

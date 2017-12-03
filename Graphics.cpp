@@ -70,7 +70,7 @@ void Graphics::DirtyRender()
 	i--;
 	vec3 position = glm::vec3(0.0f, 0.0f, -1.0f);
 	Model = glm::translate(Model, position);
-	Model = glm::scale(Model, glm::vec3(0.002f));
+	Model = glm::scale(Model, glm::vec3(0.004f));
 	Model = glm::rotate(Model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	mat4 View = cam.GetViewMatrix();
 	mat4 ModelView = View * Model;
@@ -85,10 +85,10 @@ void Graphics::DirtyRender()
 	//vec3 lightPosition = vec3(View * vec4(10.0f * sin(i / 500), -10.0f, 10.0f * sin(i / 500), 1.0f));
 	vec3 lightPosition = (position - cam.Position());
 	lightPosition = 0.9f * position + 0.2f * cam.Position();
-	lightPosition = lightPosition + vec3(sin(i / 500) * 1.0f, cos(i / 500), 0.0f);
+	lightPosition = lightPosition + vec3(1.5*sin(i / 50) * 1.0f, -7.0 + 2*cos(i / 50), 1.0f);
 	lightPosition = View * vec4(lightPosition, 1.0f);
 	prog.SetParameter("light.position", &(vec4(lightPosition, 1.0f)));
-	prog.SetParameter("light.intensity", &(glm::vec3(1.2f, 1.2f, 1.2f)));
+	prog.SetParameter("light.intensity", &(glm::vec3(2.0f, 2.0f, 2.0f)));
 	prog.SetParameter("material.Ka", &(glm::vec3(0.3f, 0.3f, 0.3f)));
 	prog.SetParameter("material.Kd", &(glm::vec3(1.0f, 1.0f, 1.0f)));
 	prog.SetParameter("material.Ks", &(glm::vec3(0.2f, 0.2f, 0.2f)));
