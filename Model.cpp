@@ -2,6 +2,8 @@
 #include <iostream>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include <map>
+#include <utility>
 using namespace std;
 
 Model::Model(const string& name, const string & path, Material* mat, bool gamma)
@@ -27,7 +29,7 @@ void Model::Initialize()
 void Model::LoadModel()
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(this->path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile(this->path, aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_FlipUVs);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
 		cout << "Error in Model::LoadModel(): Assimp:: " << importer.GetErrorString() << "\n";
@@ -52,6 +54,7 @@ void Model::ProcessNode(aiNode * node, const aiScene * scene)
 	}
 }
 
+
 Mesh Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 {
 	vector<Vertex> vertices;
@@ -69,11 +72,15 @@ Mesh Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 		tempVec.y = mesh->mVertices[i].y;
 		tempVec.z = mesh->mVertices[i].z;
 		vertex.position = tempVec;
+		
 		/* Get vertex normals. */
-		tempVec.x = mesh->mNormals[i].x;
-		tempVec.y = mesh->mNormals[i].y;
-		tempVec.z = mesh->mNormals[i].z;
-		vertex.normal = tempVec;
+		if (mesh->mNormals != NULL)
+		{
+			tempVec.x = mesh->mNormals[i].x;
+			tempVec.y = mesh->mNormals[i].y;
+			tempVec.z = mesh->mNormals[i].z;
+			vertex.normal = tempVec;
+		}
 		/* We assume there is only ONE texture coordinate per vertex. */
 		if (mesh->mTextureCoords[0] != NULL)
 		{
@@ -105,7 +112,7 @@ Mesh Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 		}
 		vertices.push_back(vertex);
 	}
-	
+	cout << "Number of vertices = " << vertices.size() << "\n";
 	/* Indices. */
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
@@ -113,7 +120,7 @@ Mesh Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 		for (unsigned int j = 0; j < face.mNumIndices; j++)
 			indices.push_back(face.mIndices[j]);
 	}
-
+	
 	/* Process Materials. */
 	aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
 	// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
@@ -200,3 +207,87 @@ unsigned int Model::TextureFromFile(const char *path, const string &directory, b
 	return textureID;
 }
 
+
+struct HalfEdge
+{
+	unsigned int vertex; // vertex index at the end of this half edge.
+	HalfEdge* twin; // oppositely oriented adjacent half-edge.
+	HalfEdge* next; // next half-edge around the face.
+};
+void Model::FindAdjacencies(aiMesh * mesh, vector<unsigned int>& indices)
+{
+	int numEdges = mesh->mNumFaces * 3;
+	HalfEdge* halfEdges = new HalfEdge[numEdges];
+	map< pair<unsigned int, unsigned int>, HalfEdge* > edgeDirectionMap;
+
+	// Create all the appropriate half-Edges for the faces.
+	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+	{
+		const aiFace& face = mesh->mFaces[i];
+		int currEdgeIndex = i * 3;
+		pair<unsigned int, unsigned int> edgePair;
+		cout << "Face [" << i << "]: ";
+
+		// half-edge from vertexA to vertexB
+		halfEdges[currEdgeIndex].vertex = face.mIndices[0];
+		halfEdges[currEdgeIndex].next = &halfEdges[currEdgeIndex + 1];
+		edgePair = { face.mIndices[0], face.mIndices[1] };
+		cout << "(" << edgePair.first << " , " << edgePair.second << "), \t";
+		edgeDirectionMap[edgePair] = &halfEdges[currEdgeIndex];
+
+		// half-edge from vertexB to vertexC
+		halfEdges[currEdgeIndex + 1].vertex = face.mIndices[1];
+		halfEdges[currEdgeIndex + 1].next = &halfEdges[currEdgeIndex + 2];
+		edgePair = { face.mIndices[1], face.mIndices[2] };
+		cout << "(" << edgePair.first << " , " << edgePair.second << "), \t";
+		edgeDirectionMap[edgePair] = &halfEdges[currEdgeIndex + 1];
+
+		// half-edge from vertexC to vertexA
+		halfEdges[currEdgeIndex + 2].vertex = face.mIndices[2];
+		halfEdges[currEdgeIndex + 2].next = &halfEdges[currEdgeIndex];
+		edgePair = { face.mIndices[2], face.mIndices[0] };
+		cout << "(" << edgePair.first << " , " << edgePair.second << "). \n";
+		edgeDirectionMap[edgePair] = &halfEdges[currEdgeIndex + 2];
+	}
+
+	int boundaryCount = 0;
+	// Populate the twin pointers.
+	for (map< pair<unsigned int, unsigned int>, HalfEdge* >::iterator it = edgeDirectionMap.begin(); it != edgeDirectionMap.end(); it++)
+	{
+		pair<unsigned int, unsigned int> edgePair = it->first;
+		unsigned int temp = edgePair.first;
+		edgePair.first = edgePair.second;
+		edgePair.second = temp;
+		if (edgeDirectionMap.find(edgePair) != edgeDirectionMap.end())
+		{
+			it->second->twin = edgeDirectionMap[edgePair];
+		}
+		else
+		{
+			boundaryCount++;
+		}
+	}
+
+	/* Now create the adjacent indices. */
+	vector<unsigned int> adjacentTriIndices;
+	if (boundaryCount > 0)
+	{
+		cout << "Mesh in Model " << this->name << " is not watertight, it contains " << boundaryCount << " boundary edges. \n";
+		for (int i = 0; i < numEdges; i++)
+		{
+			adjacentTriIndices.push_back(halfEdges[i].vertex);
+			adjacentTriIndices.push_back((halfEdges[i].twin != NULL) ? halfEdges[i].twin->vertex : halfEdges[i].vertex);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < numEdges; i++)
+		{
+			adjacentTriIndices.push_back(halfEdges[i].vertex);
+			adjacentTriIndices.push_back(halfEdges[i].twin->vertex);
+		}
+	}
+
+	indices.insert(indices.end(), adjacentTriIndices.begin(), adjacentTriIndices.end());
+	delete[] halfEdges;
+}

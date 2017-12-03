@@ -22,8 +22,7 @@ Model* shipModel;
 
 void Graphics::DirtyInitialize()
 {
-	glGenVertexArrays(1, &vertexarray);
-	glGenBuffers(1, &vertexbuffer);
+	glEnable(GL_MULTISAMPLE);
 
 	prog.Initialize();
 	prog.AddAndCompileShader("Shaders\\triangle1.vert", 'v');
@@ -39,7 +38,8 @@ void Graphics::DirtyInitialize()
 	prog.AddParameter("light.intensity", 14, 1, SP_VEC3, GLSL_VAR_UNIFORM);
 	prog.AddParameter("material.Ka", 15, 1, SP_VEC3, GLSL_VAR_UNIFORM);
 	prog.AddParameter("material.Kd", 16, 1, SP_VEC3, GLSL_VAR_UNIFORM);
-
+	prog.AddParameter("material.Ks", 17, 1, SP_VEC3, GLSL_VAR_UNIFORM);
+	prog.AddParameter("material.Shininess", 18, 1, SP_FLOAT, GLSL_VAR_UNIFORM);
 
 	prog.AddParameter("in_position", 0, 1, SP_VEC3, GLSL_VAR_IN);
 	prog.AddParameter("in_normal", 1, 1, SP_VEC3, GLSL_VAR_IN);
@@ -51,11 +51,11 @@ void Graphics::DirtyInitialize()
 	shipModel = new Model("Ship", "corvette/Corvette-F3.obj", mat, false);
 
 	/* put the camera at the positive z-axis */
-	cam.SetPosition(glm::vec3(0, 0, 5));
+	cam.SetPosition(glm::vec3(0, 0, 10));
 
 	/* turn the camera back to the origin */
 	cam.RotateAroundUp(glm::radians(180.0f));
-
+	
 	CheckForErrors();
 }
 
@@ -66,13 +66,12 @@ void Graphics::DirtyRender()
 	float aspectratio = (float)frameBufferSize.x / frameBufferSize.y;
 
 	glm::mat4 Model(1.0f);
-	Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, -2.0f));
-	Model = glm::scale(Model, glm::vec3(0.002f));
 	static float i = 0.0f;
-	i++;
-	//Model = glm::rotate(Model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	i--;
+	vec3 position = glm::vec3(0.0f, 0.0f, -1.0f);
+	Model = glm::translate(Model, position);
+	Model = glm::scale(Model, glm::vec3(0.002f));
 	Model = glm::rotate(Model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	//Model = glm::rotate(Model, (i-25)/1000, glm::vec3(0.0f, 1.0f, 0.0f));
 	mat4 View = cam.GetViewMatrix();
 	mat4 ModelView = View * Model;
 	mat4 ModelViewNormal = glm::transpose(glm::inverse(ModelView));
@@ -83,14 +82,21 @@ void Graphics::DirtyRender()
 	prog.SetParameter("Projection", ((void*)&Projection));
 	prog.SetParameter("ModelViewNormal", ((void*)&ModelViewNormal));
 	prog.SetParameter("ModelViewProjection", ((void*)&ModelViewProjection));
-	vec3 lightPosition = vec3(View * vec4(10.0f * sin(i / 1000), -10.0f, 10.0f * sin(i/1000), 1.0f));
-	prog.SetParameter("light.position", &lightPosition);
-	prog.SetParameter("light.intensity", &(glm::vec3(1.0f, 1.0f, 1.0f)));
-	prog.SetParameter("material.Ka", &(glm::vec3(0.1f, 0.1f, 0.1f)));
+	//vec3 lightPosition = vec3(View * vec4(10.0f * sin(i / 500), -10.0f, 10.0f * sin(i / 500), 1.0f));
+	vec3 lightPosition = (position - cam.Position());
+	lightPosition = 0.9f * position + 0.2f * cam.Position();
+	lightPosition = lightPosition + vec3(sin(i / 500) * 1.0f, cos(i / 500), 0.0f);
+	lightPosition = View * vec4(lightPosition, 1.0f);
+	prog.SetParameter("light.position", &(vec4(lightPosition, 1.0f)));
+	prog.SetParameter("light.intensity", &(glm::vec3(1.2f, 1.2f, 1.2f)));
+	prog.SetParameter("material.Ka", &(glm::vec3(0.3f, 0.3f, 0.3f)));
 	prog.SetParameter("material.Kd", &(glm::vec3(1.0f, 1.0f, 1.0f)));
+	prog.SetParameter("material.Ks", &(glm::vec3(0.2f, 0.2f, 0.2f)));
+	prog.SetParameter("material.Shininess", &(glm::vec3(1.0f, 1.0f, 1.0f)));
 
 	/* draw model */
 	shipModel->Draw();
+
 	glUseProgram(0);
 	CheckForErrors();
 }
@@ -117,6 +123,7 @@ void Graphics::Initialize(unsigned int width, unsigned int height)
 	Resize(width, height);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	glEnable(GL_CULL_FACE);
 	DirtyInitialize();
 }
 

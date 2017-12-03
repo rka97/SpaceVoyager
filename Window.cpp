@@ -13,6 +13,7 @@ bool Window::Initialize()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_SAMPLES, 16);
 	window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 	if (!window) {
 		cout << "Failed to create GLFW window.\n";

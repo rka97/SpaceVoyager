@@ -17,6 +17,7 @@ public:
 private:
 	void LoadModel();
 	void ProcessNode(aiNode* node, const aiScene* scene);
+	void FindAdjacencies(aiMesh* mesh, vector<unsigned int>& indices);
 	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
 	vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
 	unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
