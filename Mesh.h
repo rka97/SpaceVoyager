@@ -1,30 +1,31 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "glm/glm.hpp"
+#include "Shader.h"
+#include "Material.h"
+#include "glm\glm.hpp"
 using namespace std;
 
 struct Vertex {
 	glm::vec3 position;
 	glm::vec3 normal;
 	glm::vec2 textureCoordinates;
-	glm::vec3 Tangent;
-	glm::vec3 Bitangent;
-};
-
-struct Texture {
-	unsigned int id;
-	string type;
-	string path;
+	glm::vec3 tangent;
+	glm::vec3 bitangent;
 };
 
 class Mesh
 {
 public:
+	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, Material* mat);
+	Mesh(const Mesh& mesh);
+	void Initialize();
+	void Draw();
+private:
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;
-	vector<Texture> textures;
-
-	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures);
-	void Draw();
+	unsigned int vertexArrayObjectID;
+	unsigned int vertexBufferObjectID;
+	unsigned int elementBufferObjectID;
+	Material* material;
 };

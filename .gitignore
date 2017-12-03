@@ -35,3 +35,4 @@
 *.idb
 *.log
 *.tlog
+/x64/Debug

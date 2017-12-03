@@ -4,6 +4,7 @@
 
 class Camera : public SceneObject
 {
+public:
 	Camera(const vec3& positionVector = vec3(0, 0, 0), const vec3& rotationVector = vec3(0, 0, 0), const vec3& scaleVector = vec3(1.0f, 1.0f, 1.0f));
 	virtual ~Camera();
 
