@@ -98,7 +98,6 @@ bool ShaderProgram::UseProgram()
 	if (programID != 0 && is_Linked)
 	{
 		glUseProgram(programID);
-		cout << glGetUniformLocation(programID, "mystupidvariable") << "\n";
 	}
 	return (programID == 0) && is_Linked;
 }

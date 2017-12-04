@@ -31,7 +31,7 @@ const float specularScaleFactor = 1.0 / specularLevels;
 
 vec3 ToonShade()
 {
-	vec3 s = normalize (light.position.xyz - position.xyz);
+	vec3 s = normalize (position.xyz - light.position.xyz);
 	float cosineSN = max ( 0.0, dot (s, normal) );
 	vec3 diffuse = material.Kd * floor (cosineSN * diffuseLevels) * diffuseScaleFactor;
 	vec3 v = normalize (vec3(-position));
@@ -84,18 +84,24 @@ float IsEdge(in vec2 coords){
   return threshold(0.15,0.4,clamp(1.8*delta,0.0,1.0));
 }
 
+vec4 DiscretizeVec4 (in vec4 input, in int numLevels)
+{
+	float scaleFactor = 1.0 / numLevels;
+	vec4 discretizedOutput = input;
+	discretizedOutput.x = floor(discretizedOutput.x * numLevels) * scaleFactor;
+	discretizedOutput.y = floor(discretizedOutput.y * numLevels) * scaleFactor;
+	discretizedOutput.z = floor(discretizedOutput.z * numLevels) * scaleFactor;
+	return discretizedOutput;
+}
+
 void main()
 {
 	vec4 texColor = texture(texture_diffuse1, texCoordinates); 
 
 	/* For a retro style: enable this. colorLevels^3 colors only! */
-	const int colorLevels = 10;
-	const float colorScaleFactor = 1.0 / colorLevels;
-	texColor.x = floor(texColor.x * colorLevels) * colorScaleFactor;
-	texColor.y = floor(texColor.y * colorLevels) * colorScaleFactor;
-	texColor.z = floor(texColor.z * colorLevels) * colorScaleFactor;
-	
+	texColor = DiscretizeVec4(texColor, 10);
 	vec4 toonShadingColor = vec4(ToonShade(), 1.0);
+
 	float val_isEdge = 1 - IsEdge(texCoordinates);
 	vec4 edge_clr = vec4(val_isEdge, val_isEdge, val_isEdge, 1.0);
 	if (val_isEdge < 0.3)

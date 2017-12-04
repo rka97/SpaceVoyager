@@ -16,7 +16,6 @@ GLuint vertexarray = 0;
 GLuint vertexbuffer = 0;
 
 #include "Camera.h"
-Camera cam;
 Material* mat;
 Model* shipModel;
 
@@ -50,32 +49,38 @@ void Graphics::DirtyInitialize()
 
 	shipModel = new Model("Ship", "corvette/Corvette-F3.obj", mat, false);
 
+	Camera* cam = scene->GetSceneCamera();
+
 	/* put the camera at the positive z-axis */
-	cam.SetPosition(glm::vec3(0, 0, 10));
+	cam->SetPosition(glm::vec3(0, 0, 20));
 
 	/* turn the camera back to the origin */
-	cam.RotateAroundUp(glm::radians(180.0f));
+	cam->RotateAroundUp(glm::radians(180.0f));
 	
+	cam->ZoomIn(glm::radians(40.0f));
+
 	CheckForErrors();
 }
 
 
 void Graphics::DirtyRender()
 {
+	Camera* cam = scene->GetSceneCamera();
+	Light* mainLight = scene->GetSceneLight();
 	/* draw triangles */
 	float aspectratio = (float)frameBufferSize.x / frameBufferSize.y;
 
-	glm::mat4 Model(1.0f);
+	SceneObject spaceShipSceneObject;
+	spaceShipSceneObject.SetPosition(vec3(0.0f, 0.0f, 0.0f));
+	spaceShipSceneObject.SetScale(vec3(0.004f));
+	spaceShipSceneObject.RotateAroundRight(glm::radians(90.0f));
+	glm::mat4 Model = spaceShipSceneObject.GetTransformationMatrix();
 	static float i = 0.0f;
 	i--;
-	vec3 position = glm::vec3(0.0f, 0.0f, -1.0f);
-	Model = glm::translate(Model, position);
-	Model = glm::scale(Model, glm::vec3(0.004f));
-	Model = glm::rotate(Model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	mat4 View = cam.GetViewMatrix();
+	mat4 View = cam->GetViewMatrix();
 	mat4 ModelView = View * Model;
 	mat4 ModelViewNormal = glm::transpose(glm::inverse(ModelView));
-	mat4 Projection = cam.GetProjectionMatrix(aspectratio);
+	mat4 Projection = cam->GetProjectionMatrix(aspectratio);
 	mat4 ModelViewProjection = Projection * ModelView;
 
 	prog.SetParameter("ModelView", ((void*)&ModelView));
@@ -83,11 +88,10 @@ void Graphics::DirtyRender()
 	prog.SetParameter("ModelViewNormal", ((void*)&ModelViewNormal));
 	prog.SetParameter("ModelViewProjection", ((void*)&ModelViewProjection));
 	//vec3 lightPosition = vec3(View * vec4(10.0f * sin(i / 500), -10.0f, 10.0f * sin(i / 500), 1.0f));
-	vec3 lightPosition = (position - cam.Position());
-	lightPosition = 0.9f * position + 0.2f * cam.Position();
-	lightPosition = lightPosition + vec3(1.5*sin(i / 50) * 1.0f, -7.0 + 2*cos(i / 50), 1.0f);
-	lightPosition = View * vec4(lightPosition, 1.0f);
-	prog.SetParameter("light.position", &(vec4(lightPosition, 1.0f)));
+	//mainLight->SetPosition(spaceShipSceneObject.Position() + spaceShipSceneObject.Up());
+	//lightPosition = lightPosition + vec3(1.5*sin(i / 50) * 1.0f, 2 + 2*cos(i / 50), 1.0f);
+	vec4 lightPosition = View * mainLight->GetLightPosition();
+	prog.SetParameter("light.position", &lightPosition);
 	prog.SetParameter("light.intensity", &(glm::vec3(2.0f, 2.0f, 2.0f)));
 	prog.SetParameter("material.Ka", &(glm::vec3(0.3f, 0.3f, 0.3f)));
 	prog.SetParameter("material.Kd", &(glm::vec3(1.0f, 1.0f, 1.0f)));
@@ -117,13 +121,19 @@ void Graphics::Render()
 	DirtyRender();
 }
 
-void Graphics::Initialize(unsigned int width, unsigned int height)
+void Graphics::Initialize(unsigned int width, unsigned int height, Scene* scene)
 {
 	PrintContextInfo();
 	Resize(width, height);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
+	if (scene == nullptr)
+	{
+		cout << "Error in Graphics::Initialize(int, int, Scene*): can't initialize with NULL scene!\n";
+		return;
+	}
+	this->scene = scene;
 	DirtyInitialize();
 }
 
