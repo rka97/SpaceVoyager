@@ -12,8 +12,10 @@ class Model
 {
 public:
 	Model(const string& name, const string& path, Material* mat, bool gamma = false);
+	~Model();
 	void Draw();
 	void Initialize();
+	bool SetParameterValue(string parameterName, void* parameterValue);
 private:
 	void LoadModel();
 	void ProcessNode(aiNode* node, const aiScene* scene);
@@ -28,9 +30,9 @@ private:
 	string directory;
 
 	vector<Mesh> meshes;
-	Material* material; 
+	Material* material;
+	vector<Material*> childMaterials;
 	map<string, Texture> loadedTextures; // maps all the loaded textures so far-- avoids reloading stuff.
 
-	//vector<Material> materials;
 	bool gammaCorrection;
 };

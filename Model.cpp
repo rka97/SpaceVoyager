@@ -12,7 +12,18 @@ Model::Model(const string& name, const string & path, Material* mat, bool gamma)
 	this->path = path;
 	this->material = mat;
 	this->gammaCorrection = gamma;
-	LoadModel();
+}
+
+Model::~Model()
+{
+	// Loops over all the children materials and kills them.
+	for (vector<Material*>::iterator it = childMaterials.begin(); it != childMaterials.end(); it++)
+	{
+		if ((*it) != nullptr)
+		{
+			delete (*it);
+		}
+	}
 }
 
 void Model::Draw()
@@ -23,7 +34,16 @@ void Model::Draw()
 
 void Model::Initialize()
 {
+	LoadModel();
+}
 
+bool Model::SetParameterValue(string parameterName, void * parameterValue)
+{
+	for (vector<Material*>::iterator it = childMaterials.begin(); it != childMaterials.end(); it++)
+	{
+		(*it)->SetParameterValue(parameterName, parameterValue);
+	}
+	return material->SetParameterValue(parameterName, parameterValue);
 }
 
 void Model::LoadModel()
@@ -138,9 +158,13 @@ Mesh Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 	vector<Texture> heightMaps = LoadMaterialTextures(mat, aiTextureType_AMBIENT, "texture_height");
 	textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 	
-	Material* childMaterial = new Material(*material);
+	// there is a memory leak here-- be careful!!
 
+	Material* childMaterial = new Material(*material);
+	//childMaterial->Initialize();
 	childMaterial->SetTextures(textures);
+
+	childMaterials.push_back(childMaterial);
 
 	return Mesh(vertices, indices, childMaterial);
 }

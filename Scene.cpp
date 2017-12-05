@@ -2,6 +2,13 @@
 #include <iostream>
 using namespace std;
 
+void Scene::LoadActors()
+{
+	SceneActor* shipActor = new SceneActor();
+	shipActor->SetModel(sceneGraphicsInfo.GetModel("Imperial"));
+	sceneActors["Player"] = shipActor;
+}
+
 Scene::~Scene()
 {
 	if (camera != nullptr)
@@ -12,8 +19,10 @@ Scene::~Scene()
 
 void Scene::Initialize()
 {
-	this->camera = new Camera();
-	this->mainLight = new Light(true);
+	camera = new Camera();
+	mainLight = new Light(true);
+	sceneGraphicsInfo.Initialize();
+	LoadActors();
 }
 
 void Scene::UpdateScene()
@@ -83,4 +92,14 @@ Camera * Scene::GetSceneCamera()
 Light * Scene::GetSceneLight()
 {
 	return mainLight;
+}
+
+SceneActor * Scene::GetActor(string name)
+{
+	if (sceneActors.find(name) == sceneActors.end())
+	{
+		cout << "Error in Scene::GetActor: could not find actor with name " << name << "!\n";
+		return nullptr;
+	}
+	return sceneActors[name];
 }

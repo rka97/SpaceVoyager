@@ -11,53 +11,23 @@ using namespace std;
 using glm::vec3;
 using glm::vec4;
 
-ShaderProgram prog;
-GLuint vertexarray = 0;
-GLuint vertexbuffer = 0;
-
-#include "Camera.h"
-Material* mat;
-Model* shipModel;
-
 void Graphics::DirtyInitialize()
 {
 	glEnable(GL_MULTISAMPLE);
-
-	prog.Initialize();
-	prog.AddAndCompileShader("Shaders\\triangle1.vert", 'v');
-	prog.AddAndCompileShader("Shaders\\triangle1.frag", 'f');
-	prog.LinkProgram();
-
-	prog.AddParameter("ModelView", 0, 1, SP_MAT4, GLSL_VAR_UNIFORM);
-	prog.AddParameter("Projection", 1, 1, SP_MAT4, GLSL_VAR_UNIFORM);
-	prog.AddParameter("ModelViewNormal", 2, 1, SP_MAT4, GLSL_VAR_UNIFORM);
-	prog.AddParameter("ModelViewProjection", 3, 1, SP_MAT4, GLSL_VAR_UNIFORM);
-	prog.AddParameter("texture_diffuse1", 12, 1, SP_SAMPLER2D, GLSL_VAR_UNIFORM);
-	prog.AddParameter("light.position", 13, 1, SP_VEC4, GLSL_VAR_UNIFORM);
-	prog.AddParameter("light.intensity", 14, 1, SP_VEC3, GLSL_VAR_UNIFORM);
-	prog.AddParameter("material.Ka", 15, 1, SP_VEC3, GLSL_VAR_UNIFORM);
-	prog.AddParameter("material.Kd", 16, 1, SP_VEC3, GLSL_VAR_UNIFORM);
-	prog.AddParameter("material.Ks", 17, 1, SP_VEC3, GLSL_VAR_UNIFORM);
-	prog.AddParameter("material.Shininess", 18, 1, SP_FLOAT, GLSL_VAR_UNIFORM);
-
-	prog.AddParameter("in_position", 0, 1, SP_VEC3, GLSL_VAR_IN);
-	prog.AddParameter("in_normal", 1, 1, SP_VEC3, GLSL_VAR_IN);
-	prog.AddParameter("in_texCoordinates", 2, 1, SP_VEC2, GLSL_VAR_IN);
-
-	mat = new Material("Ship Material", &prog);
-	mat->Initialize();
-
-	shipModel = new Model("Ship", "corvette/Corvette-F3.obj", mat, false);
 
 	Camera* cam = scene->GetSceneCamera();
 
 	/* put the camera at the positive z-axis */
 	cam->SetPosition(glm::vec3(0, 0, 20));
-
 	/* turn the camera back to the origin */
 	cam->RotateAroundUp(glm::radians(180.0f));
-	
 	cam->ZoomIn(glm::radians(40.0f));
+
+
+	SceneActor* playerShip = scene->GetActor("Player");
+	playerShip->SetPosition(vec3(0.0f, 0.0f, 0.0f));
+	playerShip->SetScale(vec3(0.004f));
+	playerShip->RotateAroundRight(glm::radians(90.0f));
 
 	CheckForErrors();
 }
@@ -67,39 +37,29 @@ void Graphics::DirtyRender()
 {
 	Camera* cam = scene->GetSceneCamera();
 	Light* mainLight = scene->GetSceneLight();
+	SceneActor* playerShip = scene->GetActor("Player");
+
 	/* draw triangles */
 	float aspectratio = (float)frameBufferSize.x / frameBufferSize.y;
 
-	SceneObject spaceShipSceneObject;
-	spaceShipSceneObject.SetPosition(vec3(0.0f, 0.0f, 0.0f));
-	spaceShipSceneObject.SetScale(vec3(0.004f));
-	spaceShipSceneObject.RotateAroundRight(glm::radians(90.0f));
-	glm::mat4 Model = spaceShipSceneObject.GetTransformationMatrix();
-	static float i = 0.0f;
-	i--;
+	glm::mat4 Model = playerShip->GetTransformationMatrix();
 	mat4 View = cam->GetViewMatrix();
 	mat4 ModelView = View * Model;
 	mat4 ModelViewNormal = glm::transpose(glm::inverse(ModelView));
 	mat4 Projection = cam->GetProjectionMatrix(aspectratio);
 	mat4 ModelViewProjection = Projection * ModelView;
 
-	prog.SetParameter("ModelView", ((void*)&ModelView));
-	prog.SetParameter("Projection", ((void*)&Projection));
-	prog.SetParameter("ModelViewNormal", ((void*)&ModelViewNormal));
-	prog.SetParameter("ModelViewProjection", ((void*)&ModelViewProjection));
-	//vec3 lightPosition = vec3(View * vec4(10.0f * sin(i / 500), -10.0f, 10.0f * sin(i / 500), 1.0f));
-	//mainLight->SetPosition(spaceShipSceneObject.Position() + spaceShipSceneObject.Up());
-	//lightPosition = lightPosition + vec3(1.5*sin(i / 50) * 1.0f, 2 + 2*cos(i / 50), 1.0f);
+	playerShip->SetParameterValue("ModelView", ((void*)&ModelView));
+	playerShip->SetParameterValue("Projection", ((void*)&Projection));
+	playerShip->SetParameterValue("ModelViewNormal", ((void*)&ModelViewNormal));
+	playerShip->SetParameterValue("ModelViewProjection", ((void*)&ModelViewProjection));
+
 	vec4 lightPosition = View * mainLight->GetLightPosition();
-	prog.SetParameter("light.position", &lightPosition);
-	prog.SetParameter("light.intensity", &(glm::vec3(2.0f, 2.0f, 2.0f)));
-	prog.SetParameter("material.Ka", &(glm::vec3(0.3f, 0.3f, 0.3f)));
-	prog.SetParameter("material.Kd", &(glm::vec3(1.0f, 1.0f, 1.0f)));
-	prog.SetParameter("material.Ks", &(glm::vec3(0.2f, 0.2f, 0.2f)));
-	prog.SetParameter("material.Shininess", &(glm::vec3(1.0f, 1.0f, 1.0f)));
+	playerShip->SetParameterValue("light.position", &lightPosition);
+	playerShip->SetParameterValue("light.intensity", &(glm::vec3(2.0f, 2.0f, 2.0f)));
 
 	/* draw model */
-	shipModel->Draw();
+	playerShip->Draw();
 
 	glUseProgram(0);
 	CheckForErrors();

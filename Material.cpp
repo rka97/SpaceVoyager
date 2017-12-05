@@ -19,6 +19,11 @@ Material::Material(const Material & mat)
 {
 	this->name = mat.name;
 	this->shaderProgram = mat.shaderProgram;
+	
+	for (std::map<string, void*>::const_iterator it = mat.shaderProgramParameters.begin(); it != mat.shaderProgramParameters.end(); it++)
+	{
+		shaderProgramParameters[it->first] = it->second;
+	}
 }
 
 Material::~Material()
@@ -46,10 +51,6 @@ bool Material::Initialize()
 	return true;
 }
 
-bool Material::AddTexture(string path, string type)
-{
-	return false;
-}
 bool Material::AddTexture(Texture & texToAdd)
 {
 	textures.push_back(texToAdd);
@@ -123,7 +124,7 @@ bool Material::SetParameterValue(string parameterName, void * parameterValue)
 {
 	if (shaderProgramParameters.find(parameterName) == shaderProgramParameters.end())
 	{
-		cout << "Error in Material::SetParameterValue(str, const void*): trying to set material parameter which is not in the shader program.\n";
+		cout << "Error in Material::SetParameterValue(str, const void*): trying to set material parameter [" << parameterName << "] which is not in the shader program.\n";
 		return false;
 	}
 	else if (parameterValue == NULL)
