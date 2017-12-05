@@ -12,6 +12,27 @@ SceneGraphicsInformation::~SceneGraphicsInformation()
 		if ((*it) != nullptr)
 			delete (*it);
 	}
+	// delete all the models
+	for (map<string, Model*>::iterator it = models.begin(); it != models.end(); it++)
+	{
+		if (it->second != nullptr)
+			delete it->second;
+		it->second = nullptr;
+	}
+	// delete all the materials
+	for (map<string, Material*>::iterator it = materials.begin(); it != materials.end(); it++)
+	{
+		if (it->second != nullptr)
+			delete it->second;
+		it->second = nullptr;
+	}
+	// delete all the models
+	for (map<string, ShaderProgram*>::iterator it = shaderPrograms.begin(); it != shaderPrograms.end(); it++)
+	{
+		if (it->second != nullptr)
+			delete it->second;
+		it->second = nullptr;
+	}
 }
 
 void SceneGraphicsInformation::Initialize()
@@ -35,8 +56,8 @@ void SceneGraphicsInformation::LoadShaderPrograms()
 {
 	ShaderProgram* toonShader = new ShaderProgram();
 	toonShader->Initialize();
-	toonShader->AddAndCompileShader("Shaders\\triangle1.vert", 'v');
-	toonShader->AddAndCompileShader("Shaders\\triangle1.frag", 'f');
+	toonShader->AddAndCompileShader("Shaders\\toon.vert", 'v');
+	toonShader->AddAndCompileShader("Shaders\\toon.frag", 'f');
 	toonShader->LinkProgram();
 	toonShader->AddParameter("ModelView", 0, 1, SP_MAT4, GLSL_VAR_UNIFORM);
 	toonShader->AddParameter("Projection", 1, 1, SP_MAT4, GLSL_VAR_UNIFORM);
@@ -89,7 +110,7 @@ void SceneGraphicsInformation::LoadModels()
 		cout << "Error in SceneGraphicsInformation::LoadModels(): trying to use material [" << materialName << "] which is not yet set!\n";
 		return;
 	}
-	Model* shipModel = new Model("Imperial", "corvette/Corvette-F3.obj", materials[materialName], false);
+	Model* shipModel = new Model("Imperial", "models/corvette/Corvette-F3.obj", materials[materialName], false);
 	shipModel->Initialize(); // actually loads the model.
 	models["Imperial"] = shipModel;
 }

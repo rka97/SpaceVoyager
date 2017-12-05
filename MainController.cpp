@@ -29,6 +29,9 @@ MainController::MainController()
 
 MainController::~MainController()
 {
+	delete wind;
+	delete graphicsController;
+	delete sceneController;
 }
 
 bool MainController::Initialize()

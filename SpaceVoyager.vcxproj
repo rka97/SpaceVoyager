@@ -179,8 +179,8 @@
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\triangle1.frag" />
-    <None Include="Shaders\triangle1.vert" />
+    <None Include="Shaders\toon.frag" />
+    <None Include="Shaders\toon.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
