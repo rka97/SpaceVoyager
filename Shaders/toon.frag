@@ -18,6 +18,7 @@ struct MaterialInfo
 	float Shininess;
 };
 
+layout (location = 6) uniform vec3 cameraPosition;
 layout (location = 12) uniform sampler2D texture_diffuse1;
 layout (location = 13) uniform LightInfo light; // will take 13 and 14.
 layout (location = 15) uniform MaterialInfo material; // will take 15-18.
@@ -26,20 +27,37 @@ layout (location = 0) out vec4 out_color;
 
 const int diffuseLevels = 4;
 const float diffuseScaleFactor = 1.0 / diffuseLevels;
-const int specularLevels = 2;
+const int specularLevels = 10;
 const float specularScaleFactor = 1.0 / specularLevels;
+
+
+vec3 DirectionalLight()
+{
+	vec3 surfaceToLight = normalize(- light.position.xyz);
+	float brightness = dot (normal, surfaceToLight);
+	brightness = clamp(brightness, 0, 1);
+	vec3 diffuse = material.Kd * light.intensity.xyz * brightness;
+
+	vec3 surfaceToCamera = normalize(cameraPosition - position);
+    float specularCoefficient = 0.0;
+    specularCoefficient = pow(max(0.0, dot(surfaceToCamera, reflect(- surfaceToLight, normal))), material.Shininess);
+    vec3 specular = material.Ks * specularCoefficient * light.intensity.xyz;
+
+	return diffuse + specular;
+}
 
 vec3 ToonShade()
 {
-	vec3 s = normalize (position.xyz - light.position.xyz);
+	vec3 s = normalize (- light.position.xyz);
 	float cosineSN = max ( 0.0, dot (s, normal) );
-	vec3 diffuse = material.Kd * floor (cosineSN * diffuseLevels) * diffuseScaleFactor;
-	vec3 v = normalize (vec3(-position));
+	vec3 diffuse = material.Kd * round (cosineSN * diffuseLevels) * diffuseScaleFactor;
+
+	vec3 v = normalize (position - cameraPosition);
 	vec3 r = reflect (-s, normal);
 	float cosineRV = max (0.0, dot (r, v));
-	vec3 specular = material.Ks * pow ( floor(cosineRV * specularLevels) * specularScaleFactor, material.Shininess );
+	vec3 specular = material.Ks * pow ( round(cosineRV * specularLevels) * specularScaleFactor, material.Shininess );
 
-	return light.intensity * (material.Ka + diffuse + specular * 0.25f);
+	return light.intensity * (material.Ka + diffuse + specular);
 }
 
 float threshold(in float thr1, in float thr2 , in float val) {
@@ -100,7 +118,7 @@ void main()
 
 	/* For a retro style: enable this. colorLevels^3 colors only! */
 	texColor = DiscretizeVec4(texColor, 10);
-	vec4 toonShadingColor = vec4(ToonShade(), 1.0);
+	vec4 toonShadingColor = vec4(ToonShade(), 1.0); // vec4(DirectionalLight(), 1.0); // 
 
 	float val_isEdge = 1 - IsEdge(texCoordinates);
 	vec4 edge_clr = vec4(val_isEdge, val_isEdge, val_isEdge, 1.0);

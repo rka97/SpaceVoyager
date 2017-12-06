@@ -63,6 +63,9 @@ void SceneGraphicsInformation::LoadShaderPrograms()
 	toonShader->AddParameter("Projection", 1, 1, SP_MAT4, GLSL_VAR_UNIFORM);
 	toonShader->AddParameter("ModelViewNormal", 2, 1, SP_MAT4, GLSL_VAR_UNIFORM);
 	toonShader->AddParameter("ModelViewProjection", 3, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	toonShader->AddParameter("Model", 4, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	toonShader->AddParameter("ModelNormal", 5, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	toonShader->AddParameter("cameraPosition", 6, 1, SP_VEC3, GLSL_VAR_UNIFORM);
 	toonShader->AddParameter("texture_diffuse1", 12, 1, SP_SAMPLER2D, GLSL_VAR_UNIFORM);
 	toonShader->AddParameter("light.position", 13, 1, SP_VEC4, GLSL_VAR_UNIFORM);
 	toonShader->AddParameter("light.intensity", 14, 1, SP_VEC3, GLSL_VAR_UNIFORM);
@@ -86,10 +89,10 @@ void SceneGraphicsInformation::LoadMaterials()
 	}
 	Material* shipMaterial = new Material("ToonShip", shaderPrograms[progName]);
 	shipMaterial->Initialize();
-	vec3* materialAmbient = new vec3(0.5f, 0.5f, 0.5f);
-	vec3* materialDiffuse = new vec3(1.0f, 1.0f, 1.0f);
-	vec3* materialSpecular = new vec3(0.2f, 0.2f, 0.2f);
-	vec3* materialShininess = new vec3(1.0f, 1.0f, 1.0f);
+	vec3* materialAmbient = new vec3(0.3f);
+	vec3* materialDiffuse = new vec3(0.7f);
+	vec3* materialSpecular = new vec3(0.2f);
+	vec3* materialShininess = new vec3(32.0f);
 	shipMaterial->SetParameterValue("material.Ka", materialAmbient);
 	shipMaterial->SetParameterValue("material.Kd", materialDiffuse);
 	shipMaterial->SetParameterValue("material.Ks", materialSpecular);
@@ -113,4 +116,8 @@ void SceneGraphicsInformation::LoadModels()
 	Model* shipModel = new Model("Imperial", "models/corvette/Corvette-F3.obj", materials[materialName], false);
 	shipModel->Initialize(); // actually loads the model.
 	models["Imperial"] = shipModel;
+
+	Model* rockModel = new Model("Rock", "models/rock/rock.obj", materials[materialName], false);
+	rockModel->Initialize();
+	models["Rock"] = rockModel;
 }

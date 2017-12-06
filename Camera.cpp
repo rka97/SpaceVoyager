@@ -1,7 +1,7 @@
 #include "Camera.h"
 #include <glm/gtc/matrix_transform.hpp>
 
-Camera::Camera(const vec3& positionVector, const vec3& scaleVector) : SceneObject(positionVector, scaleVector), fieldOfView(45.0f), zNear(0.1f), zFar(100.0f)
+Camera::Camera(const vec3& positionVector, const vec3& scaleVector) : SceneObject(positionVector, scaleVector), fieldOfView(glm::radians(90.0f)), zNear(0.1f), zFar(100.0f)
 {
 
 }
@@ -41,8 +41,8 @@ void Camera::ZoomIn(float angle)
 	fieldOfView -= angle;
 	if (fieldOfView < glm::radians(1.0f))
 		fieldOfView = glm::radians(1.0f);
-	if (fieldOfView > glm::radians(90.0f))
-		fieldOfView = glm::radians(90.0f);
+	if (fieldOfView > glm::radians(120.0f))
+		fieldOfView = glm::radians(120.0f);
 }
 
 void Camera::ZoomOut(float angle)

@@ -15,10 +15,15 @@ class Scene
 	SceneGraphicsInformation sceneGraphicsInfo;
 	map<string, SceneActor*> sceneActors;
 	queue<int>* inputBuffer;
+	bool editorMode;
 	void LoadActors();
+	void UpdateSceneGameMode();
+	void UpdateSceneEditMode();
 public:
+	Scene();
 	~Scene();
 	void Initialize();
+	void setEditorMode(bool editorMode);
 	void UpdateScene();
 	bool SetInputBuffer(queue<int>* inBuff);
 	Camera* GetSceneCamera();

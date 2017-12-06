@@ -15,19 +15,8 @@ void Graphics::DirtyInitialize()
 {
 	glEnable(GL_MULTISAMPLE);
 
-	Camera* cam = scene->GetSceneCamera();
+	Light* mainLight = scene->GetSceneLight();
 
-	/* put the camera at the positive z-axis */
-	cam->SetPosition(glm::vec3(0, 0, 20));
-	/* turn the camera back to the origin */
-	cam->RotateAroundUp(glm::radians(180.0f));
-	cam->ZoomIn(glm::radians(40.0f));
-
-
-	SceneActor* playerShip = scene->GetActor("Player");
-	playerShip->SetPosition(vec3(0.0f, 0.0f, 0.0f));
-	playerShip->SetScale(vec3(0.004f));
-	playerShip->RotateAroundRight(glm::radians(90.0f));
 
 	CheckForErrors();
 }
@@ -46,17 +35,21 @@ void Graphics::DirtyRender()
 	mat4 View = cam->GetViewMatrix();
 	mat4 ModelView = View * Model;
 	mat4 ModelViewNormal = glm::transpose(glm::inverse(ModelView));
+	mat4 ModelNormal = glm::transpose(glm::inverse(Model));
 	mat4 Projection = cam->GetProjectionMatrix(aspectratio);
 	mat4 ModelViewProjection = Projection * ModelView;
 
+	playerShip->SetParameterValue("Model", ((void*)&Model));
 	playerShip->SetParameterValue("ModelView", ((void*)&ModelView));
 	playerShip->SetParameterValue("Projection", ((void*)&Projection));
 	playerShip->SetParameterValue("ModelViewNormal", ((void*)&ModelViewNormal));
+	playerShip->SetParameterValue("ModelNormal", ((void*)&ModelNormal));
 	playerShip->SetParameterValue("ModelViewProjection", ((void*)&ModelViewProjection));
+	playerShip->SetParameterValue("cameraPosition", ((void*)&cam->Position()));
 
-	vec4 lightPosition = View * mainLight->GetLightPosition();
+	vec4 lightPosition = mainLight->GetLightPosition();
 	playerShip->SetParameterValue("light.position", &lightPosition);
-	playerShip->SetParameterValue("light.intensity", &(glm::vec3(2.0f, 2.0f, 2.0f)));
+	playerShip->SetParameterValue("light.intensity", &(glm::vec3(1.5f)));
 
 	/* draw model */
 	playerShip->Draw();
