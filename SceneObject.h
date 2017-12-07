@@ -6,7 +6,7 @@ using namespace glm;
 class SceneObject
 {
 public:
-	SceneObject(const vec3& positionVector = vec3(0, 0, 0), const vec3& rotationVector = vec3(0, 0, 0), const vec3& scaleVector = vec3(1.0f, 1.0f, 1.0f));
+	SceneObject(const vec3& positionVector = vec3(0.0f, 0.0f, 0.0f), const vec3& scaleVector = vec3(1.0f, 1.0f, 1.0f));
 	~SceneObject();
 
 	vec3 Position() const;

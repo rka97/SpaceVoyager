@@ -98,7 +98,6 @@ bool ShaderProgram::UseProgram()
 	if (programID != 0 && is_Linked)
 	{
 		glUseProgram(programID);
-		cout << glGetUniformLocation(programID, "mystupidvariable") << "\n";
 	}
 	return (programID == 0) && is_Linked;
 }
@@ -179,7 +178,7 @@ bool ShaderProgram::SetParameter(string name, const void * value)
 	map<string, ShaderParameter>::const_iterator it = inputParameters.find(name);
 	if (it == inputParameters.end())
 	{
-		cout << "Error in ShaderProgram::SetParameter: parameter named " << name << " not found in input parameters!\n";
+		//cout << "Error in ShaderProgram::SetParameter: parameter named " << name << " not found in input parameters!\n";
 		return false;
 	}
 	if (it->second.glslVarType == GLSL_VAR_UNIFORM)

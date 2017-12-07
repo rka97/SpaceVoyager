@@ -7,7 +7,7 @@
 #define DEFAULT_DIRECTION_UP (vec3(0, 1, 0))
 #define DEFAULT_DIRECTION_RIGHT (vec3(1, 0, 0))
 
-SceneObject::SceneObject(const vec3& positionVector, const vec3& rotationVector, const vec3& scaleVector) : position(positionVector), rotation(quat(vec4(rotationVector, 1))), scale(scaleVector)
+SceneObject::SceneObject(const vec3& positionVector, const vec3& scaleVector) : position(positionVector), scale(scaleVector)
 {
 
 }

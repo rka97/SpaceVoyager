@@ -1,0 +1,16 @@
+# Blender MTL File: 'None'
+# Material Count: 1
+
+newmtl SF_Corvette_F3
+Ns 19.607843
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd SF_Corvette-F3_diffuse.jpg
+map_Bump SF_Corvette-F3_bump.jpg
+map_Ka SF_Corvette-F3_diffuse.jpg
+map_Ke SF_Corvette-F3_glow.jpg

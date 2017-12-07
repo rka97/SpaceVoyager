@@ -20,7 +20,7 @@ public:
 	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, Material* mat);
 	Mesh(const Mesh& mesh);
 	void Initialize();
-	void Draw();
+	virtual void Draw();
 private:
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;

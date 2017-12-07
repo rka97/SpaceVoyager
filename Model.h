@@ -12,9 +12,11 @@ class Model
 {
 public:
 	Model(const string& name, const string& path, Material* mat, bool gamma = false);
-	void Draw();
+	~Model();
+	virtual void Draw();
 	void Initialize();
-private:
+	bool SetParameterValue(string parameterName, void* parameterValue);
+protected:
 	void LoadModel();
 	void ProcessNode(aiNode* node, const aiScene* scene);
 	void FindAdjacencies(aiMesh* mesh, vector<unsigned int>& indices);
@@ -28,9 +30,9 @@ private:
 	string directory;
 
 	vector<Mesh> meshes;
-	Material* material; 
+	Material* material;
+	vector<Material*> childMaterials;
 	map<string, Texture> loadedTextures; // maps all the loaded textures so far-- avoids reloading stuff.
 
-	//vector<Material> materials;
 	bool gammaCorrection;
 };

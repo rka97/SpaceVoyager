@@ -1,6 +1,7 @@
 #pragma once
 #include <list>
 #include <string>
+#include "Scene.h"
 #include <glm\glm.hpp>
 using namespace std;
 
@@ -22,17 +23,19 @@ struct GLContextInfo
 class Graphics
 {
 	glm::uvec2 frameBufferSize;
+	Scene* scene;
 public:
 	Graphics();
 	~Graphics();
 	
 	// Render functions: responsible for drawing all objects in the main loop.
+	void DrawScene();
 	void Render();
 	void DirtyRender();
 	void DirtyInitialize();
 
 	// Initialize function: responsible for initializing everything to defaults.
-	void Initialize(unsigned int width, unsigned int height);
+	void Initialize(unsigned int width, unsigned int height, Scene* scene);
 	
 	// Resizes the OpenGL Viewport.
 	void Resize(unsigned int width, unsigned int height);

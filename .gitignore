@@ -5,7 +5,6 @@
 *.slo
 *.lo
 *.o
-*.obj
 
 # Precompiled Headers
 *.gch
@@ -14,6 +13,7 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
+*.dll
 
 # Fortran module files
 *.mod
@@ -29,6 +29,12 @@
 *.out
 *.app
 
+# Project Files
+*.vcxproj
+
+# Executable Files
+x64/
+
 # Linker and Debug Files
 *.ilk
 *.pdb
@@ -36,3 +42,4 @@
 *.log
 *.tlog
 /x64/Debug
+/models/skybox
