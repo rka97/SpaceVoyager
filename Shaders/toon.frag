@@ -25,12 +25,6 @@ layout (location = 15) uniform MaterialInfo material; // will take 15-18.
 
 layout (location = 0) out vec4 out_color;
 
-const int diffuseLevels = 4;
-const float diffuseScaleFactor = 1.0 / diffuseLevels;
-const int specularLevels = 10;
-const float specularScaleFactor = 1.0 / specularLevels;
-
-
 vec3 DirectionalLight()
 {
 	vec3 surfaceToLight = normalize(- light.position.xyz);
@@ -39,23 +33,37 @@ vec3 DirectionalLight()
 	vec3 diffuse = material.Kd * light.intensity.xyz * brightness;
 
 	vec3 surfaceToCamera = normalize(cameraPosition - position);
-    float specularCoefficient = 0.0;
-    specularCoefficient = pow(max(0.0, dot(surfaceToCamera, reflect(- surfaceToLight, normal))), material.Shininess);
+	vec3 halfDir = normalize(surfaceToLight + (cameraPosition - position));
+	float specularAngle = max (dot(halfDir, normal), 0.0);
+	float specularCoefficient = pow (specularAngle, material.Shininess);
+    //float specularCoefficient = pow(max(0.0, dot(surfaceToCamera, reflect(- surfaceToLight, normal))), material.Shininess);
     vec3 specular = material.Ks * specularCoefficient * light.intensity.xyz;
 
 	return diffuse + specular;
 }
 
+const int diffuseLevels = 4;
+const float diffuseScaleFactor = 1.0 / diffuseLevels;
+const int specularLevels = 2;
+const float specularScaleFactor = 1.0 / specularLevels;
+
 vec3 ToonShade()
 {
-	vec3 s = normalize (- light.position.xyz);
-	float cosineSN = max ( 0.0, dot (s, normal) );
+	vec3 surfaceToLight = normalize (- light.position.xyz);
+	float cosineSN = max ( 0.0, dot (surfaceToLight, normal) );
 	vec3 diffuse = material.Kd * round (cosineSN * diffuseLevels) * diffuseScaleFactor;
 
+	vec3 surfaceToCamera = normalize(cameraPosition - position);
+	vec3 halfDir = normalize(surfaceToLight + (cameraPosition - position));
+	float specularAngle = max (dot(halfDir, normal), 0.0);
+	float specularCoefficient = pow (round(specularAngle * specularLevels) * specularScaleFactor, material.Shininess);
+	vec3 specular = material.Ks * specularCoefficient;
+	/*
 	vec3 v = normalize (position - cameraPosition);
 	vec3 r = reflect (-s, normal);
 	float cosineRV = max (0.0, dot (r, v));
 	vec3 specular = material.Ks * pow ( round(cosineRV * specularLevels) * specularScaleFactor, material.Shininess );
+	*/
 
 	return light.intensity * (material.Ka + diffuse + specular);
 }
@@ -112,18 +120,25 @@ vec4 DiscretizeVec4 (in vec4 input, in int numLevels)
 	return discretizedOutput;
 }
 
+vec3 DiffuseLight()
+{
+	vec3 lightDirection = light.position.xyz;
+	float dotProduct = max (0.0, dot (normal, -lightDirection));
+	return vec3(1.0, 1.0, 1.0) * dotProduct;
+}
+
 void main()
 {
 	vec4 texColor = texture(texture_diffuse1, texCoordinates); 
 
 	/* For a retro style: enable this. colorLevels^3 colors only! */
-	texColor = DiscretizeVec4(texColor, 10);
-	vec4 toonShadingColor = vec4(ToonShade(), 1.0); // vec4(DirectionalLight(), 1.0); // 
+	texColor = DiscretizeVec4(texColor, 8);
+	vec4 toonShadingColor =  vec4(ToonShade(), 1.0); //  vec4(DirectionalLight(), 1.0); //
 
 	float val_isEdge = 1 - IsEdge(texCoordinates);
 	vec4 edge_clr = vec4(val_isEdge, val_isEdge, val_isEdge, 1.0);
 	if (val_isEdge < 0.3)
 		out_color = edge_clr;
 	else
-		out_color = toonShadingColor * texColor * edge_clr;
+		out_color = toonShadingColor * texColor;
 }

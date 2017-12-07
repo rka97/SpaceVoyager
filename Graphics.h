@@ -29,6 +29,7 @@ public:
 	~Graphics();
 	
 	// Render functions: responsible for drawing all objects in the main loop.
+	void DrawScene();
 	void Render();
 	void DirtyRender();
 	void DirtyInitialize();

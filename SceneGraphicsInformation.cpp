@@ -90,7 +90,7 @@ void SceneGraphicsInformation::LoadMaterials()
 	Material* shipMaterial = new Material("ToonShip", shaderPrograms[progName]);
 	shipMaterial->Initialize();
 	vec3* materialAmbient = new vec3(0.3f);
-	vec3* materialDiffuse = new vec3(0.7f);
+	vec3* materialDiffuse = new vec3(0.6f);
 	vec3* materialSpecular = new vec3(0.2f);
 	vec3* materialShininess = new vec3(32.0f);
 	shipMaterial->SetParameterValue("material.Ka", materialAmbient);
@@ -103,6 +103,23 @@ void SceneGraphicsInformation::LoadMaterials()
 	createdParameters.push_back(materialDiffuse);
 	createdParameters.push_back(materialSpecular);
 	createdParameters.push_back(materialShininess);
+
+	Material* skyMaterial = new Material("SkyProgram", shaderPrograms[progName]);
+	skyMaterial->Initialize();
+	vec3* material2Ambient = new vec3(0.7f);
+	vec3* material2Diffuse = new vec3(0.0f);
+	vec3* material2Specular = new vec3(0.0f);
+	vec3* material2Shininess = new vec3(32.0f);
+	skyMaterial->SetParameterValue("material.Ka", material2Ambient);
+	skyMaterial->SetParameterValue("material.Kd", material2Diffuse);
+	skyMaterial->SetParameterValue("material.Ks", material2Specular);
+	skyMaterial->SetParameterValue("material.Shininess", material2Shininess);
+	materials["SkyMaterial"] = skyMaterial;
+
+	createdParameters.push_back(material2Ambient);
+	createdParameters.push_back(material2Diffuse);
+	createdParameters.push_back(material2Specular);
+	createdParameters.push_back(material2Shininess);
 }
 
 void SceneGraphicsInformation::LoadModels()
@@ -113,11 +130,27 @@ void SceneGraphicsInformation::LoadModels()
 		cout << "Error in SceneGraphicsInformation::LoadModels(): trying to use material [" << materialName << "] which is not yet set!\n";
 		return;
 	}
-	Model* shipModel = new Model("Imperial", "models/corvette/Corvette-F3.obj", materials[materialName], false);
+	Model* shipModel = new Model("Imperial", "models/corvette/spaceship.obj", materials[materialName], false);
 	shipModel->Initialize(); // actually loads the model.
 	models["Imperial"] = shipModel;
 
-	Model* rockModel = new Model("Rock", "models/rock/rock.obj", materials[materialName], false);
+	Model* rockModel = new Model("Rock", "models/meteor/meteor.obj", materials[materialName], false);
 	rockModel->Initialize();
 	models["Rock"] = rockModel;
+
+	Model* skyModel = new Model("Sky", "models/skyplane/skyplane.obj", materials["SkyMaterial"], false);
+	skyModel->Initialize();
+	models["Sky"] = skyModel;
+
+	Model* fighterModel = new Model("AK5", "models/SciFi/SciFi.obj", materials[materialName], false);
+	fighterModel->Initialize();
+	models["Fighter"] = fighterModel;
+
+	Model* saucerModel = new Model("Saucer", "models/saucer/Low_poly_UFO.obj", materials[materialName], false);
+	saucerModel->Initialize();
+	models["Saucer"] = saucerModel;
+
+	Model* planetModel = new Model("Planet", "models/planet/planet.obj", materials[materialName], false);
+	planetModel->Initialize();
+	models["Planet"] = planetModel;
 }

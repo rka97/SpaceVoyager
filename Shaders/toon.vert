@@ -16,6 +16,7 @@ layout (location = 2) out vec3 normal;
 
 void main()
 {
+	//normal = vec3(normalize(ModelNormal * vec4(in_normal, 0.0)));
 	normal = vec3(normalize(ModelNormal * vec4(in_normal, 0.0)));
 	position = vec3(Model * vec4(in_position, 1.0));
 	texCoordinates = in_texCoordinates;

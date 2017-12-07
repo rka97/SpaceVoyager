@@ -13,10 +13,10 @@ class Model
 public:
 	Model(const string& name, const string& path, Material* mat, bool gamma = false);
 	~Model();
-	void Draw();
+	virtual void Draw();
 	void Initialize();
 	bool SetParameterValue(string parameterName, void* parameterValue);
-private:
+protected:
 	void LoadModel();
 	void ProcessNode(aiNode* node, const aiScene* scene);
 	void FindAdjacencies(aiMesh* mesh, vector<unsigned int>& indices);

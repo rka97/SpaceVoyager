@@ -132,7 +132,7 @@ Mesh Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 		}
 		vertices.push_back(vertex);
 	}
-	cout << "Number of vertices = " << vertices.size() << "\n";
+	cout << "Loading Model [" << this->name << "]: number of vertices = " << vertices.size() << "\n";
 	/* Indices. */
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
@@ -215,6 +215,7 @@ unsigned int Model::TextureFromFile(const char *path, const string &directory, b
 			format = GL_RGBA;
 
 		glBindTexture(GL_TEXTURE_2D, textureID);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 

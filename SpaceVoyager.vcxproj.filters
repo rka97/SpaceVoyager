@@ -107,12 +107,21 @@
     <ClInclude Include="SceneGraphicsInformation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Stars.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\toon.frag">
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\toon.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="star.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="star.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -13,47 +13,46 @@ using glm::vec4;
 
 void Graphics::DirtyInitialize()
 {
-	glEnable(GL_MULTISAMPLE);
-
-	Light* mainLight = scene->GetSceneLight();
-
-
-	CheckForErrors();
 }
 
 
-void Graphics::DirtyRender()
+void Graphics::DrawScene()
 {
 	Camera* cam = scene->GetSceneCamera();
 	Light* mainLight = scene->GetSceneLight();
-	SceneActor* playerShip = scene->GetActor("Player");
-
-	/* draw triangles */
+	map<string, SceneActor*> sceneActors = *(scene->GetSceneActors());
 	float aspectratio = (float)frameBufferSize.x / frameBufferSize.y;
-
-	glm::mat4 Model = playerShip->GetTransformationMatrix();
 	mat4 View = cam->GetViewMatrix();
-	mat4 ModelView = View * Model;
-	mat4 ModelViewNormal = glm::transpose(glm::inverse(ModelView));
-	mat4 ModelNormal = glm::transpose(glm::inverse(Model));
-	mat4 Projection = cam->GetProjectionMatrix(aspectratio);
-	mat4 ModelViewProjection = Projection * ModelView;
-
-	playerShip->SetParameterValue("Model", ((void*)&Model));
-	playerShip->SetParameterValue("ModelView", ((void*)&ModelView));
-	playerShip->SetParameterValue("Projection", ((void*)&Projection));
-	playerShip->SetParameterValue("ModelViewNormal", ((void*)&ModelViewNormal));
-	playerShip->SetParameterValue("ModelNormal", ((void*)&ModelNormal));
-	playerShip->SetParameterValue("ModelViewProjection", ((void*)&ModelViewProjection));
-	playerShip->SetParameterValue("cameraPosition", ((void*)&cam->Position()));
-
 	vec4 lightPosition = mainLight->GetLightPosition();
-	playerShip->SetParameterValue("light.position", &lightPosition);
-	playerShip->SetParameterValue("light.intensity", &(glm::vec3(1.5f)));
+	vec3 lightIntensity = vec3(1.0f);
+	vec3 cameraPosition = cam->Position();
 
-	/* draw model */
-	playerShip->Draw();
+	for (map<string, SceneActor*>::iterator it = sceneActors.begin(); it != sceneActors.end(); it++)
+	{
+		SceneActor* currentActor = it->second;
+		mat4 Model = currentActor->GetTransformationMatrix();
+		mat4 ModelView = View * Model;
+		mat4 ModelNormal = currentActor->GetRotationMatrix(); //glm::transpose(glm::inverse(Model));
+		mat4 Projection = cam->GetProjectionMatrix(aspectratio);
+		mat4 ModelViewProjection = Projection * ModelView;
 
+		currentActor->SetParameterValue("Model", &Model);
+		currentActor->SetParameterValue("ModelView", &ModelView);
+		currentActor->SetParameterValue("Projection", &Projection);
+		currentActor->SetParameterValue("ModelNormal", &ModelNormal);
+		currentActor->SetParameterValue("ModelViewProjection", &ModelViewProjection);
+
+		currentActor->SetParameterValue("cameraPosition", &cameraPosition);
+		currentActor->SetParameterValue("light.position", &lightPosition);
+		currentActor->SetParameterValue("light.intensity", &lightIntensity);
+
+		currentActor->Draw();
+	}
+}
+
+void Graphics::DirtyRender()
+{
+	DrawScene();
 	glUseProgram(0);
 	CheckForErrors();
 }
@@ -69,7 +68,7 @@ Graphics::~Graphics()
 
 void Graphics::Render()
 {
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	DirtyRender();
 }
@@ -87,7 +86,9 @@ void Graphics::Initialize(unsigned int width, unsigned int height, Scene* scene)
 		return;
 	}
 	this->scene = scene;
+	glEnable(GL_MULTISAMPLE);
 	DirtyInitialize();
+	CheckForErrors();
 }
 
 void Graphics::Resize(unsigned int width, unsigned int height)

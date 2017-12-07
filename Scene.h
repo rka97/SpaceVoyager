@@ -29,4 +29,5 @@ public:
 	Camera* GetSceneCamera();
 	Light* GetSceneLight();
 	SceneActor* GetActor(string name);
+	map<string, SceneActor*>* GetSceneActors();
 };

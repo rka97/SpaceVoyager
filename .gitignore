@@ -42,3 +42,4 @@ x64/
 *.log
 *.tlog
 /x64/Debug
+/models/skybox

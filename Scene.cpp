@@ -1,5 +1,7 @@
 #include "Scene.h"
 #include <iostream>
+#include <string>
+#include <time.h>
 using namespace std;
 
 void Scene::LoadActors()
@@ -7,9 +9,125 @@ void Scene::LoadActors()
 	SceneActor* shipActor = new SceneActor();
 	shipActor->SetModel(sceneGraphicsInfo.GetModel("Imperial"));
 	sceneActors["Player"] = shipActor;
+
 	SceneActor* rockActor = new SceneActor();
-	rockActor->SetModel(sceneGraphicsInfo.GetModel("Rock"));
-	sceneActors["Rock"] = rockActor;
+	for (int i = 0; i < 5; i++)
+	{
+		rockActor = new SceneActor();
+		rockActor->SetModel(sceneGraphicsInfo.GetModel("Rock"));
+		sceneActors["TempRock" + to_string(i)] = rockActor;
+	}
+
+	SceneActor* fighterActor = new SceneActor();
+	fighterActor->SetModel(sceneGraphicsInfo.GetModel("Fighter"));
+	sceneActors["Fighter1"] = fighterActor;
+
+	for (int i = 0; i < 5; i++)
+	{
+		fighterActor = new SceneActor();
+		fighterActor->SetModel(sceneGraphicsInfo.GetModel("Fighter"));
+		sceneActors["TempFighter" + to_string(i)] = fighterActor;
+	}
+
+	SceneActor* saucerActor = new SceneActor();
+	saucerActor->SetModel(sceneGraphicsInfo.GetModel("Saucer"));
+	sceneActors["Saucer1"] = saucerActor;
+
+	/*
+	SceneActor* skyActor = new SceneActor();
+	skyActor->SetModel(sceneGraphicsInfo.GetModel("Sky"));
+	sceneActors["Sky"] = skyActor;
+	*/
+	
+	/*
+	SceneActor* planetActor = new SceneActor();
+	planetActor->SetModel(sceneGraphicsInfo.GetModel("Planet"));
+	sceneActors["Planet1"] = planetActor;
+	*/
+}
+
+
+void Scene::Initialize()
+{
+	camera = new Camera();
+	mainLight = new Light(true);
+	sceneGraphicsInfo.Initialize();
+	LoadActors();
+
+	/* put the camera at the positive z-axis */;
+	camera->SetPosition(glm::vec3(0, 0, 20));
+	/* turn the camera back to the origin */
+	camera->RotateAroundUp(glm::radians(180.0f));
+	camera->ZoomOut(glm::radians(50.0f));
+
+	mainLight->SetPosition(glm::vec3(0, 0, -1.0f));
+	
+	srand(time(0));
+
+	SceneActor* playerShip = GetActor("Player");
+	if (playerShip != nullptr)
+	{
+		playerShip->SetPosition(vec3(0.0f, 0.0f, 0.0f));
+		playerShip->SetScale(vec3(2.0f));
+		playerShip->RotateAroundRight(glm::radians(90.0f));
+		playerShip->RotateAroundUp(glm::radians(180.0f));
+		playerShip->SetPosition(vec3(0.0f, 0.0f, 0.0f));
+	}
+
+	SceneActor* rockActor;
+	for (int i = 0; i < 5; i++)
+	{
+		rockActor = GetActor("TempRock" + to_string(i));
+		if (rockActor != nullptr)
+		{
+			rockActor->SetScale(vec3(1.5f));
+			rockActor->SetPosition(vec3((rand() % 132 - 32.0f), (rand() % 100), 0.0f));
+			//rockActor->RotateAroundRight(glm::radians(90.0f));
+			//rockActor->RotateAroundRight(glm::radians((float)(rand() % 180)));
+		}
+	}
+
+	SceneActor* fighterActor = GetActor("Fighter1");
+	if (fighterActor != nullptr)
+	{
+		fighterActor->SetScale(vec3(0.002f));
+		fighterActor->RotateAroundUp(glm::radians(90.0f));
+		fighterActor->RotateAroundRight(glm::radians(90.0f));
+		fighterActor->RotateAroundForward(glm::radians(-90.0f));
+		fighterActor->SetPosition(vec3(0.0f, 26.0f, 0.0f));
+	}
+
+
+	for (int i = 0; i < 5; i++)
+	{
+		fighterActor = GetActor("TempFighter" + to_string(i));
+		if (fighterActor != nullptr)
+		{
+			fighterActor->SetScale(vec3(0.002f));
+			fighterActor->RotateAroundUp(glm::radians(90.0f));
+			fighterActor->RotateAroundRight(glm::radians(90.0f));
+			fighterActor->RotateAroundForward(glm::radians(-90.0f));
+			fighterActor->SetPosition(vec3((rand() % 132 - 32.0f), (rand() % 100), 0.0f));
+		}
+	}
+
+
+	SceneActor* saucerActor = GetActor("Saucer1");
+	if (saucerActor != nullptr)
+	{
+		saucerActor->SetScale(vec3(2.0f));
+		saucerActor->RotateAroundRight(glm::radians(90.0f));
+		saucerActor->SetPosition(vec3(2.0f, 89.0f, 0.0f));
+	}
+	/*
+	SceneActor* skyActor = GetActor("Sky");
+	if (skyActor != nullptr)
+	{
+		skyActor->SetScale(vec3(10.0f));
+		skyActor->RotateAroundRight(glm::radians(90.0f));
+		skyActor->SetPosition(vec3(0.0f, 0.0f, -20.0f));
+	}
+	*/
 }
 
 
@@ -29,31 +147,11 @@ Scene::~Scene()
 		delete mainLight;
 	for (std::map<string, SceneActor*>::iterator it = sceneActors.begin(); it != sceneActors.end(); it++)
 	{
+		vec3 pos = it->second->Position();
+		cout << "actor " << it->first << " has final position (" << pos.x << ", " << pos.y << ", " << pos.z << ").\n";
 		if (it->second != nullptr)
 			delete it->second;
 	}
-}
-
-void Scene::Initialize()
-{
-	camera = new Camera();
-	mainLight = new Light(true);
-	sceneGraphicsInfo.Initialize();
-	LoadActors();
-
-	/* put the camera at the positive z-axis */;
-	camera->SetPosition(glm::vec3(0, 0, 20));
-	/* turn the camera back to the origin */
-	camera->RotateAroundUp(glm::radians(180.0f));
-	camera->ZoomIn(glm::radians(40.0f));
-
-	mainLight->SetPosition(glm::vec3(0, 1, 0));
-
-	SceneActor* playerShip = GetActor("Player");
-	playerShip->SetPosition(vec3(0.0f, 0.0f, 0.0f));
-	playerShip->SetScale(vec3(0.004f));
-	playerShip->RotateAroundRight(glm::radians(90.0f));
-	playerShip->SetPosition(vec3(0.0f, 0.0f, 0.0f));
 }
 
 void Scene::setEditorMode(bool editorMode)
@@ -126,7 +224,8 @@ void Scene::UpdateSceneEditMode()
 	static map<string, SceneActor*>::iterator it = sceneActors.begin();
 	if (it->second != nullptr)
 	{
-		mainLight->SetPosition(sceneActors["Player"]->Position() + vec3(0.0f, 120.0f, 0.0f));
+		cout << "Current Object = " << it->first << "\n";
+		camera->SetPosition(it->second->Position() + vec3(0, 0, 20));
 	}
 	while (!inputBuffer->empty())
 	{
@@ -157,34 +256,32 @@ void Scene::UpdateSceneEditMode()
 				vec3 actorPos = it->second->Position();
 				cout << "Actor " << it->first << " position = (" << actorPos.x << ", " << actorPos.y << ", " << actorPos.z << ").\n";
 				it++;
+				if (it == sceneActors.end())
+					it = sceneActors.begin();
 			}
 			break;
 		case GLFW_KEY_UP:
 			if (it != sceneActors.end())
 			{
 				it->second->Move(camera->Up());
-				mainLight->Move(camera->Up());
 			}
 			break;
 		case GLFW_KEY_RIGHT:
 			if (it != sceneActors.end())
 			{
 				it->second->Move(camera->Right());
-				mainLight->Move(camera->Right());
 			}
 			break;
 		case GLFW_KEY_LEFT:
 			if (it != sceneActors.end())
 			{
 				it->second->Move(camera->Left());
-				mainLight->Move(camera->Left());
 			}
 			break;
 		case GLFW_KEY_DOWN:
 			if (it != sceneActors.end())
 			{
 				it->second->Move(camera->Down());
-				mainLight->Move(camera->Down());
 			}
 			break;
 		case GLFW_KEY_KP_ADD:
@@ -240,4 +337,9 @@ SceneActor * Scene::GetActor(string name)
 		return nullptr;
 	}
 	return sceneActors[name];
+}
+
+map<string, SceneActor*>* Scene::GetSceneActors()
+{
+	return &sceneActors;
 }
