@@ -4,6 +4,7 @@ using namespace std;
 
 queue<KeyboardEvent> MainController::inputBuffer;
 
+long long timeNow;
 
 void MainController::ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -51,8 +52,10 @@ void MainController::MainLoop()
 	glfwSetKeyCallback(wind->GetGLFWPointer(), ProcessInput);
 	while (!wind->ShouldClose())
 	{
+		timeNow = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count();
 		sceneController->UpdateScene();
 		wind->WindowLoop();
+		glfwPollEvents();
 		graphicsController->Render();
 	}
 }

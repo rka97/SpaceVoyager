@@ -6,12 +6,18 @@
 #include <utility>
 using namespace std;
 
-Model::Model(const string& name, const string & path, Material* mat, bool gamma)
+Model::Model(const string& name, const string & path, Material* mat, bool isInstanced, bool gamma)
 {
 	this->name = name;
 	this->path = path;
 	this->material = mat;
 	this->gammaCorrection = gamma;
+	this->isInstanced = isInstanced;
+}
+
+Model::Model(const string& name, Material* mat) {
+	this->name = name;
+	this->material = mat;
 }
 
 Model::~Model()
@@ -26,10 +32,10 @@ Model::~Model()
 	}
 }
 
-void Model::Draw()
+void Model::Draw(int numInstances)
 {
 	for (auto& mesh : meshes)
-		mesh.Draw();
+		mesh.Draw(numInstances);
 }
 
 void Model::Initialize()
@@ -37,13 +43,13 @@ void Model::Initialize()
 	LoadModel();
 }
 
-bool Model::SetParameterValue(string parameterName, void * parameterValue)
+bool Model::SetParameterValue(int id, void * parameterValue)
 {
 	for (vector<Material*>::iterator it = childMaterials.begin(); it != childMaterials.end(); it++)
 	{
-		(*it)->SetParameterValue(parameterName, parameterValue);
+		(*it)->SetParameterValue(id, parameterValue);
 	}
-	return material->SetParameterValue(parameterName, parameterValue);
+	return material->SetParameterValue(id, parameterValue);
 }
 
 void Model::LoadModel()
@@ -166,7 +172,7 @@ Mesh Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 
 	childMaterials.push_back(childMaterial);
 
-	return Mesh(vertices, indices, childMaterial);
+	return Mesh(vertices, indices, childMaterial, isInstanced);
 }
 
 vector<Texture> Model::LoadMaterialTextures(aiMaterial * mat, aiTextureType type, string typeName)
@@ -315,4 +321,21 @@ void Model::FindAdjacencies(aiMesh * mesh, vector<unsigned int>& indices)
 
 	indices.insert(indices.end(), adjacentTriIndices.begin(), adjacentTriIndices.end());
 	delete[] halfEdges;
+}
+
+int Model::GetParameterId(string parameterName) {
+	return material->GetParameterID(parameterName);
+}
+
+Material * Model::GetMaterial()
+{
+	return material;
+}
+
+void Model::InitializeInstanced(void * data, int numInstances)
+{
+	for (auto& mesh : meshes)
+	{
+		mesh.InitializeInstanced(data, numInstances);
+	}
 }

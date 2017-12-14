@@ -35,6 +35,7 @@ enum ParameterType
 
 struct ShaderParameter
 {
+	string name;
 	unsigned int location;
 	unsigned int count;
 	ParameterType paramType;
@@ -46,8 +47,9 @@ struct ShaderParameter
 		this->paramType = SP_END;
 		this->glslVarType = GLSL_VAR_NULL;
 	}
-	ShaderParameter(unsigned int location, int count, ParameterType type, GLSLVariableType glslType)
+	ShaderParameter(string name, unsigned int location, int count, ParameterType type, GLSLVariableType glslType)
 	{
+		this->name = name;
 		this->location = location;
 		this->count = count;
 		this->paramType = type;
@@ -73,11 +75,14 @@ public:
 	string GetProgramInfoLog();
 	/* Parameter functions. */
 	bool AddParameter(string parameterName, unsigned int location, unsigned int count, ParameterType type, GLSLVariableType glslType);
-	bool SetParameter(string name, const void* value);
-	int	 GetParameterLocation(string name);
+	bool SetParameter(int id, const void* value);
+	int	 GetParameterLocation(int id);
+	int GetParameterLocation(string name);
+
 private:
 	vector<Shader*> shaderList;
-	map<string, ShaderParameter> inputParameters; // this map stores parameter name AND parameter type.
+	//map<string, ShaderParameter> inputParameters; // this map stores parameter name AND parameter type.
+	vector<ShaderParameter> shaderInputParameters;
 	GLint programID;
 	bool is_Linked;
 

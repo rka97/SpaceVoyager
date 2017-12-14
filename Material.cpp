@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 using std::cout;
+
 Material::Material(string name, ShaderProgram * prog)
 {
 	this->name = name;
@@ -19,11 +20,7 @@ Material::Material(const Material & mat)
 {
 	this->name = mat.name;
 	this->shaderProgram = mat.shaderProgram;
-	
-	for (std::map<string, void*>::const_iterator it = mat.shaderProgramParameters.begin(); it != mat.shaderProgramParameters.end(); it++)
-	{
-		shaderProgramParameters[it->first] = it->second;
-	}
+	this->shaderParameters = mat.shaderParameters;
 }
 
 Material::~Material()
@@ -43,9 +40,10 @@ bool Material::Initialize()
 		cout << "Error in Material::Initialize: shaderProgram is not yet linked!\n";
 		return false;
 	}
-	for (std::map<string, ShaderParameter>::const_iterator it = shaderProgram->inputParameters.begin(); it != shaderProgram->inputParameters.end(); it++)
+	for (std::vector<ShaderParameter>::const_iterator it = shaderProgram->shaderInputParameters.begin(); it != shaderProgram->shaderInputParameters.end(); it++)
 	{
-		shaderProgramParameters[it->first] = NULL;
+		//shaderProgramParameters[it->first] = NULL;
+		shaderParameters.push_back(ShaderParameterData(it->name));
 	}
 	// Initialize shader program (if not already initialized).
 	return true;
@@ -70,12 +68,17 @@ void Material::ActivateMaterial()
 	}
 	shaderProgram->UseProgram();
 	this->BindTextures();
+	for (int i = 0; i < shaderParameters.size(); i++) {
+		if (shaderParameters[i].data != nullptr)
+			shaderProgram->SetParameter(i, shaderParameters[i].data);
+	}
+	/*
 	for (map<string, void*>::iterator it = shaderProgramParameters.begin(); it != shaderProgramParameters.end(); it++)
 	{
 		if (it->second != NULL)
 			shaderProgram->SetParameter(it->first, it->second);
 	}
-
+	*/
 }
 
 void Material::BindTextures()
@@ -106,6 +109,8 @@ void Material::BindTextures()
 			*/
 		string textureParameterName = name + number;
 		int* j;
+
+		/*
 		if (shaderProgramParameters[textureParameterName] != NULL)
 		{
 			j = (int*)shaderProgramParameters[textureParameterName];
@@ -113,6 +118,18 @@ void Material::BindTextures()
 		}
 		j = new int;
 		*j = i;
+		*/
+
+		ShaderParameterData* spd = GetShaderParameter(textureParameterName);
+		if (spd == nullptr) continue;
+		if (spd->data != nullptr) {
+			j = (int*)spd->data;
+			delete j;
+		}
+		
+		j = new int;
+		*j = i;
+
 		// now set the sampler to the correct texture unit
 		SetParameterValue(textureParameterName, j);
 		// and finally bind the texture
@@ -120,16 +137,47 @@ void Material::BindTextures()
 	}
 }
 
-bool Material::SetParameterValue(string parameterName, void * parameterValue)
+Material::ShaderParameterData* Material::GetShaderParameter(string parameterName) {
+	for (auto& par : shaderParameters) {
+		if (par.name == parameterName) {
+			return &par;
+		}
+	}
+	return nullptr;
+}
+
+int	Material::GetParameterID(string parameterName) {
+	int i = 0;
+	for (auto& par : shaderParameters) {
+		if (par.name == parameterName) {
+			return i;
+		}
+		i++;
+	}
+	return -1;
+}
+
+bool Material::SetParameterValue(string parameterName, void* parameterValue) {
+	for (auto& par : shaderParameters) {
+		if (par.name == parameterName) {
+			par.data = parameterValue;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Material::SetParameterValue(int id, void* parameterValue)
 {
+	/*
 	if (shaderProgramParameters.find(parameterName) == shaderProgramParameters.end())
 	{
-		cout << "Error in Material::SetParameterValue(str, const void*): trying to set material parameter [" << parameterName << "] which is not in the shader program.\n";
+		// cout << "Error in Material::SetParameterValue(str, const void*): trying to set material parameter [" << parameterName << "] which is not in the shader program.\n";
 		return false;
 	}
 	else if (parameterValue == NULL)
 	{
-		cout << "Error in Material::SetParameterValue(str, const void*): trying to set material parameter to NULL pointer.\n";
+		// cout << "Error in Material::SetParameterValue(str, const void*): trying to set material parameter to NULL pointer.\n";
 		return false;
 	}
 	else
@@ -137,6 +185,12 @@ bool Material::SetParameterValue(string parameterName, void * parameterValue)
 		shaderProgramParameters[parameterName] = parameterValue;
 		return true;
 	}
+	*/
+	if (id >= shaderParameters.size() || id < 0) {
+		// cout << "Error in Material::SetParameterValue(str, const void*): trying to set material parameter [" << parameterName << "] which is not in the shader program.\n";
+		return false;
+	}
+	shaderParameters[id].data = parameterValue;
 }
 
 int Material::GetParameterLocation(string name)

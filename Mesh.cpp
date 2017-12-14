@@ -3,11 +3,12 @@
 #include <iostream>
 using std::cout;
 
-Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, Material* mat)
+Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, Material* mat, bool isInstanced)
 {
 	this->vertices = vertices;
 	this->indices = indices;
 	this->material = mat;
+	this->isInstanced = isInstanced;
 	this->Initialize();
 }
 
@@ -40,29 +41,32 @@ void Mesh::Initialize()
 	// set the vertex attribute pointers
 	GLint attribLocation = 0;
 	attribLocation = material->GetParameterLocation("in_position");
-	if (attribLocation == -1)
-	{
-		cout << "ERROR: attribute in_position not found.\n";
-		return;
+	if (attribLocation != -1) {
+		glVertexAttribPointer(attribLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+		glEnableVertexAttribArray(attribLocation);
 	}
-	glVertexAttribPointer(attribLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
-	glEnableVertexAttribArray(attribLocation);
 	attribLocation = material->GetParameterLocation("in_normal");
-	if (attribLocation == -1)
-	{
-		cout << "ERROR: attribute in_normal not found.\n";
-		return;
+	if (attribLocation != -1) {
+		glVertexAttribPointer(attribLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+		glEnableVertexAttribArray(attribLocation);
 	}
-	glVertexAttribPointer(attribLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-	glEnableVertexAttribArray(attribLocation);
 	attribLocation = material->GetParameterLocation("in_texCoordinates");
-	if (attribLocation == -1)
+	if (attribLocation != -1)
 	{
-		cout << "ERROR: attribute in_texCoordinates not found.\n";
-		return;
+		glVertexAttribPointer(attribLocation, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureCoordinates));
+		glEnableVertexAttribArray(attribLocation);
 	}
-	glVertexAttribPointer(attribLocation, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureCoordinates));
-	glEnableVertexAttribArray(attribLocation);
+	attribLocation = material->GetParameterLocation("in_vertexColor");
+	if (attribLocation != -1)
+	{
+		glVertexAttribPointer(attribLocation, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, vertexColor));
+		glEnableVertexAttribArray(attribLocation);
+	}
+
+	if (isInstanced)
+	{
+		glGenBuffers(1, &instanceBufferObjectID);
+	}
 
 	glBindVertexArray(0);
 	/* Enable these later. */
@@ -77,7 +81,26 @@ void Mesh::Initialize()
 	*/
 }
 
-void Mesh::Draw()
+void Mesh::InitializeInstanced(void* data, int maxNumInstances)
+{
+	if (isInstanced)
+	{
+		glBindVertexArray(vertexArrayObjectID);
+		material->ActivateMaterial();
+		glBindBuffer(GL_ARRAY_BUFFER, instanceBufferObjectID);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * maxNumInstances, &((glm::vec3*)data)[0], GL_STREAM_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		int attributeLocation = 1;
+		glEnableVertexAttribArray(attributeLocation);
+		glBindBuffer(GL_ARRAY_BUFFER, instanceBufferObjectID);
+		glVertexAttribPointer(attributeLocation, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glVertexAttribDivisor(attributeLocation, 1);
+		glBindVertexArray(0);
+	}
+}
+
+void Mesh::Draw(int numInstances)
 {
 	if (material == NULL)
 	{
@@ -89,7 +112,14 @@ void Mesh::Draw()
 
 	// draw mesh
 	glBindVertexArray(vertexArrayObjectID);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	if (isInstanced)
+	{
+		glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, numInstances);
+	}
+	else
+	{
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	}
 	
 	// always good practice to set everything back to defaults once configured.
 	glBindVertexArray(0);

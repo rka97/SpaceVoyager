@@ -77,6 +77,29 @@ void SceneGraphicsInformation::LoadShaderPrograms()
 	toonShader->AddParameter("in_normal", 1, 1, SP_VEC3, GLSL_VAR_IN);
 	toonShader->AddParameter("in_texCoordinates", 2, 1, SP_VEC2, GLSL_VAR_IN);
 	shaderPrograms["Toon"] = toonShader;
+
+	ShaderProgram* bulletShader = new ShaderProgram();
+	bulletShader->Initialize();
+	bulletShader->AddAndCompileShader("Shaders\\bullet.vert", 'v');
+	bulletShader->AddAndCompileShader("Shaders\\bullet.frag", 'f');
+	bulletShader->LinkProgram();
+	
+	bulletShader->AddParameter("View", 0, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	bulletShader->AddParameter("Projection", 1, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	bulletShader->AddParameter("Size", 2, 1, SP_VEC2, GLSL_VAR_UNIFORM);
+	bulletShader->AddParameter("Angle", 3, 1, SP_FLOAT, GLSL_VAR_UNIFORM);
+
+	bulletShader->AddParameter("InnerRadius", 4, 1, SP_FLOAT, GLSL_VAR_UNIFORM);
+	bulletShader->AddParameter("MiddleRadius", 5, 1, SP_FLOAT, GLSL_VAR_UNIFORM);
+	bulletShader->AddParameter("OuterRadius", 6, 1, SP_FLOAT, GLSL_VAR_UNIFORM);
+	bulletShader->AddParameter("InnerColor", 7, 1, SP_VEC4, GLSL_VAR_UNIFORM);
+	bulletShader->AddParameter("MiddleColor", 8, 1, SP_VEC4, GLSL_VAR_UNIFORM);
+	bulletShader->AddParameter("OuterColor", 9, 1, SP_VEC4, GLSL_VAR_UNIFORM);
+
+	bulletShader->AddParameter("in_position", 0, 1, SP_VEC3, GLSL_VAR_IN);
+	bulletShader->AddParameter("Center_worldspace", 1, 1, SP_VEC3, GLSL_VAR_IN);
+
+	shaderPrograms["Bullet"] = bulletShader;
 }
 
 void SceneGraphicsInformation::LoadMaterials()
@@ -93,10 +116,12 @@ void SceneGraphicsInformation::LoadMaterials()
 	vec3* materialDiffuse = new vec3(0.6f);
 	vec3* materialSpecular = new vec3(0.2f);
 	vec3* materialShininess = new vec3(32.0f);
-	shipMaterial->SetParameterValue("material.Ka", materialAmbient);
-	shipMaterial->SetParameterValue("material.Kd", materialDiffuse);
-	shipMaterial->SetParameterValue("material.Ks", materialSpecular);
-	shipMaterial->SetParameterValue("material.Shininess", materialShininess);
+	
+	shipMaterial->SetParameterValue(shipMaterial->GetParameterID("material.Ka"), materialAmbient);
+	shipMaterial->SetParameterValue(shipMaterial->GetParameterID("material.Kd"), materialDiffuse);
+	shipMaterial->SetParameterValue(shipMaterial->GetParameterID("material.Ks"), materialSpecular);
+	shipMaterial->SetParameterValue(shipMaterial->GetParameterID("material.Shininess"), materialShininess);
+	
 	materials["ToonShip"] = shipMaterial;
 
 	createdParameters.push_back(materialAmbient);
@@ -110,16 +135,22 @@ void SceneGraphicsInformation::LoadMaterials()
 	vec3* material2Diffuse = new vec3(0.0f);
 	vec3* material2Specular = new vec3(0.0f);
 	vec3* material2Shininess = new vec3(32.0f);
+	/*
 	skyMaterial->SetParameterValue("material.Ka", material2Ambient);
 	skyMaterial->SetParameterValue("material.Kd", material2Diffuse);
 	skyMaterial->SetParameterValue("material.Ks", material2Specular);
 	skyMaterial->SetParameterValue("material.Shininess", material2Shininess);
+	*/
 	materials["SkyMaterial"] = skyMaterial;
 
 	createdParameters.push_back(material2Ambient);
 	createdParameters.push_back(material2Diffuse);
 	createdParameters.push_back(material2Specular);
 	createdParameters.push_back(material2Shininess);
+
+	Material* bulletMaterial = new Material("BulletProgram", shaderPrograms["Bullet"]);
+	bulletMaterial->Initialize();
+	materials["BulletMaterial"] = bulletMaterial;
 }
 
 void SceneGraphicsInformation::LoadModels()
@@ -130,6 +161,7 @@ void SceneGraphicsInformation::LoadModels()
 		cout << "Error in SceneGraphicsInformation::LoadModels(): trying to use material [" << materialName << "] which is not yet set!\n";
 		return;
 	}
+
 	Model* shipModel = new Model("Imperial", "models/corvette/spaceship.obj", materials[materialName], false);
 	shipModel->Initialize(); // actually loads the model.
 	models["Imperial"] = shipModel;
@@ -146,11 +178,14 @@ void SceneGraphicsInformation::LoadModels()
 	fighterModel->Initialize();
 	models["Fighter"] = fighterModel;
 
-	Model* saucerModel = new Model("Saucer", "models/saucer/Low_poly_UFO.obj", materials[materialName], false);
-	saucerModel->Initialize();
-	models["Saucer"] = saucerModel;
-
 	Model* planetModel = new Model("Planet", "models/planet/planet.obj", materials[materialName], false);
 	planetModel->Initialize();
 	models["Planet"] = planetModel;
+	
+	Model* saucerModel = new Model("Saucer", "models/saucer/Low_poly_UFO.obj", materials[materialName]);
+	saucerModel->Initialize();
+	models["Saucer"] = saucerModel;
+
+	BulletModel* bulletModel = new BulletModel("Bullet", materials["BulletMaterial"]);
+	models["Bullet"] = bulletModel;
 }

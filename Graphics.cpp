@@ -1,15 +1,18 @@
 #define GLEW_STATIC
-#include <GL\glew.h>
-#include "GLFW\glfw3.h"
-#include <glm\glm.hpp>
-#include <glm\gtc\matrix_transform.hpp>
+#include <GL/glew.h>
+#include "GLFW/glfw3.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "Graphics.h"
 #include "ShaderProgram.h"
 #include "Model.h"
 #include <iostream>
+
 using namespace std;
 using glm::vec3;
 using glm::vec4;
+
+SceneInfo sceneInfo;
 
 void Graphics::DirtyInitialize()
 {
@@ -20,40 +23,28 @@ void Graphics::DrawScene()
 {
 	Camera* cam = scene->GetSceneCamera();
 	Light* mainLight = scene->GetSceneLight();
-	map<string, SceneActor*> sceneActors = *(scene->GetSceneActors());
+	map<string, Drawable*> sceneActors = *(scene->GetSceneActors());
 	float aspectratio = (float)frameBufferSize.x / frameBufferSize.y;
 	mat4 View = cam->GetViewMatrix();
 	vec4 lightPosition = mainLight->GetLightPosition();
 	vec3 lightIntensity = vec3(1.0f);
 	vec3 cameraPosition = cam->Position();
 
-	for (map<string, SceneActor*>::iterator it = sceneActors.begin(); it != sceneActors.end(); it++)
+	mat4 Projection = cam->GetProjectionMatrix(aspectratio);
+	sceneInfo.View = View;
+	sceneInfo.Projection = Projection;
+
+	for (map<string, Drawable*>::iterator it = sceneActors.begin(); it != sceneActors.end(); it++)
 	{
-		SceneActor* currentActor = it->second;
-		mat4 Model = currentActor->GetTransformationMatrix();
-		mat4 ModelView = View * Model;
-		mat4 ModelNormal = currentActor->GetRotationMatrix(); //glm::transpose(glm::inverse(Model));
-		mat4 Projection = cam->GetProjectionMatrix(aspectratio);
-		mat4 ModelViewProjection = Projection * ModelView;
-
-		currentActor->SetParameterValue("Model", &Model);
-		currentActor->SetParameterValue("ModelView", &ModelView);
-		currentActor->SetParameterValue("Projection", &Projection);
-		currentActor->SetParameterValue("ModelNormal", &ModelNormal);
-		currentActor->SetParameterValue("ModelViewProjection", &ModelViewProjection);
-
-		currentActor->SetParameterValue("cameraPosition", &cameraPosition);
-		currentActor->SetParameterValue("light.position", &lightPosition);
-		currentActor->SetParameterValue("light.intensity", &lightIntensity);
-
-		currentActor->Draw();
+		Drawable* currentActor = it->second;
+		currentActor->Draw(sceneInfo);
 	}
 }
 
 void Graphics::DirtyRender()
 {
 	DrawScene();
-	glUseProgram(0);
+	//glUseProgram(0);
 	CheckForErrors();
 }
 
@@ -68,7 +59,7 @@ Graphics::~Graphics()
 
 void Graphics::Render()
 {
-	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
+	//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	DirtyRender();
 }
@@ -80,6 +71,8 @@ void Graphics::Initialize(unsigned int width, unsigned int height, Scene* scene)
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	if (scene == nullptr)
 	{
 		cout << "Error in Graphics::Initialize(int, int, Scene*): can't initialize with NULL scene!\n";

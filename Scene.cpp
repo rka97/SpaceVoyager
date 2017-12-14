@@ -2,20 +2,31 @@
 #include <iostream>
 #include <string>
 #include <time.h>
+#include <glm/gtx/norm.hpp>
 using namespace std;
 
-bool SHIP_UP = false;
-bool SHIP_DOWN = false;
-bool SHIP_LEFT = false;
-bool SHIP_RIGHT = false;
+BulletsController* formation;
 
-SceneActor* playerShip;
+long long lastUpdateTime = 0;
+float theta = 0;
+float dTheta = 0.1;
 
 void Scene::LoadActors()
 {
-	SceneActor* shipActor = new SceneActor();
-	shipActor->SetModel(sceneGraphicsInfo.GetModel("Imperial"));
-	sceneActors["Player"] = shipActor;
+	lastUpdateTime = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count();
+	formation = new BulletsController();
+	sceneActors["Formation"] = formation;
+	SceneActor* sa = new SceneActor();
+	sa->SetModel(sceneGraphicsInfo.GetModel("Planet"));
+	sceneActors["Saucer"] = sa;
+
+	vector<Bullet*> bullets;
+	for (int i = 0; i < 500; i++) {
+		Bullet* bullet = new Bullet();
+		bullet->SetModel(sceneGraphicsInfo.GetModel("Bullet"));
+		bullets.push_back(bullet);
+	}
+	formation->AddBullets(bullets);
 }
 
 
@@ -33,18 +44,6 @@ void Scene::Initialize()
 	camera->ZoomOut(glm::radians(50.0f));
 
 	mainLight->SetPosition(glm::vec3(0, 0, -1.0f));
-	
-	srand(time(0));
-
-	playerShip = GetActor("Player");
-	if (playerShip != nullptr)
-	{
-		playerShip->SetPosition(vec3(0.0f, 0.0f, 0.0f));
-		playerShip->SetScale(vec3(2.0f));
-		playerShip->RotateAroundRight(glm::radians(90.0f));
-		playerShip->RotateAroundUp(glm::radians(180.0f));
-		playerShip->SetPosition(vec3(0.0f, 0.0f, 0.0f));
-	}
 }
 
 
@@ -62,10 +61,8 @@ Scene::~Scene()
 		delete camera;
 	if (mainLight != nullptr)
 		delete mainLight;
-	for (std::map<string, SceneActor*>::iterator it = sceneActors.begin(); it != sceneActors.end(); it++)
+	for (std::map<string, Drawable*>::iterator it = sceneActors.begin(); it != sceneActors.end(); it++)
 	{
-		vec3 pos = it->second->Position();
-		cout << "actor " << it->first << " has final position (" << pos.x << ", " << pos.y << ", " << pos.z << ").\n";
 		if (it->second != nullptr)
 			delete it->second;
 	}
@@ -76,9 +73,25 @@ void Scene::setEditorMode(bool editorMode)
 	this->editorMode = editorMode;
 }
 
+glm::vec3 Spiral(float& t, glm::vec3& center, glm::vec3& rightVector, glm::vec3& upVector) {
+	return center + (cos(t) * rightVector + sin(t) * upVector) * t * t;
+}
+
+glm::vec3 Curvilinear(float dT, glm::vec3& velocity, glm::vec3& acceleration, glm::vec3& jerk, float& speed) {
+	float velocityNorm = l2Norm(velocity);
+	vec3 tangent = velocity * (1 / velocityNorm);
+	vec3 normal = vec3(tangent.y, -tangent.x, 0);
+	acceleration += dT * jerk;
+	velocity += (tangent * acceleration.x + normal * acceleration.y) * dT;
+	if(speed != -1)
+		return dT * (velocity * speed / velocityNorm);
+	return dT * velocity;
+}
 
 void Scene::UpdateSceneGameMode()
 {
+	formation->Update();
+
 	while (!inputBuffer->empty())
 	{
 		KeyboardEvent e = inputBuffer->front();
@@ -91,18 +104,6 @@ void Scene::UpdateSceneGameMode()
 			break;
 		case GLFW_KEY_R:
 			camera->Move(camera->Backward());
-			break;
-		case GLFW_KEY_W:
-			SHIP_UP = (e.eventType == GLFW_PRESS || e.eventType == GLFW_REPEAT);
-			break;
-		case GLFW_KEY_A:
-			SHIP_LEFT = (e.eventType == GLFW_PRESS || e.eventType == GLFW_REPEAT);
-			break;
-		case GLFW_KEY_D:
-			SHIP_RIGHT = (e.eventType == GLFW_PRESS || e.eventType == GLFW_REPEAT);
-			break;
-		case GLFW_KEY_S:
-			SHIP_DOWN = (e.eventType == GLFW_PRESS || e.eventType == GLFW_REPEAT);
 			break;
 		case GLFW_KEY_UP:
 			mainLight->Move(camera->Up());
@@ -122,21 +123,25 @@ void Scene::UpdateSceneGameMode()
 		case GLFW_KEY_KP_SUBTRACT:
 			camera->ZoomOut(glm::radians(1.0f));
 			break;
+		case GLFW_KEY_X: 
+		{
+			
+			float tmpTheta = theta;
+			for (int i = 0; i < 10; i++) {
+				vec3 pos = vec3(cos(tmpTheta), sin(tmpTheta), 0) * 10.0f;
+				formation->ActivateBullet(Curvilinear, pos, vec3(pos) * 3.0f, vec3(20, 19, 0), vec3(0), 10);
+				tmpTheta += 2 * M_PI / 10;
+			}
+			theta += dTheta;
+			break;
+		}
+		case GLFW_KEY_Z:
+			break;
+		case GLFW_KEY_C:
+			break;
 		default:
 			break;
 		}
-	}
-	if (SHIP_UP) {
-		playerShip->Move(glm::vec3(0,0.2,0));
-	}
-	if (SHIP_DOWN) {
-		playerShip->Move(glm::vec3(0, -0.2, 0));
-	}
-	if (SHIP_LEFT) {
-		playerShip->Move(glm::vec3(-0.2, 0, 0));
-	}
-	if (SHIP_RIGHT) {
-		playerShip->Move(glm::vec3(0.2, 0, 0));
 	}
 }
 
@@ -169,7 +174,7 @@ Light * Scene::GetSceneLight()
 	return mainLight;
 }
 
-SceneActor * Scene::GetActor(string name)
+Drawable * Scene::GetActor(string name)
 {
 	if (sceneActors.find(name) == sceneActors.end())
 	{
@@ -179,7 +184,7 @@ SceneActor * Scene::GetActor(string name)
 	return sceneActors[name];
 }
 
-map<string, SceneActor*>* Scene::GetSceneActors()
+map<string, Drawable*>* Scene::GetSceneActors()
 {
 	return &sceneActors;
 }
