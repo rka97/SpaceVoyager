@@ -19,13 +19,14 @@ bool SceneActor::SetModel(Model * actorModel)
 		cout << "Error in SceneActor::SetModel: trying to set NULL model.\n";
 		return false;
 	}
+
 }
 
-void SceneActor::Draw()
+void SceneActor::Draw(SceneInfo& sceneInfo, int numInstances)
 {
 	if (model != nullptr)
 	{
-		model->Draw();
+		model->Draw(numInstances);
 	}
 	else
 	{
@@ -34,7 +35,12 @@ void SceneActor::Draw()
 	}
 }
 
-bool SceneActor::SetParameterValue(string parameterName, void * parameterValue)
+bool SceneActor::SetParameterValue(int id, void * parameterValue)
 {
-	return model->SetParameterValue(parameterName, parameterValue);
+	return model->SetParameterValue(id, parameterValue);
+}
+
+Model * SceneActor::GetModel()
+{
+	return model;
 }

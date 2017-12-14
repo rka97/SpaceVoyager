@@ -3,6 +3,8 @@
 #include "Material.h"
 #include <map>
 #include <string>
+#include "BulletModel.h"
+
 using std::map;
 using std::string;
 

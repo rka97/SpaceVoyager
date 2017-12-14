@@ -2,20 +2,16 @@
 #include <iostream>
 using namespace std;
 
-void MainController::ProcessInput()
+queue<KeyboardEvent> MainController::inputBuffer;
+
+long long timeNow;
+
+void MainController::ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	GLFWwindow* window = wind->GetGLFWPointer();
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-	{
-		wind->SetClose(true);
-	}
-	for (int i = GLFW_KEY_SPACE; i < GLFW_KEY_LAST; i++)
-	{
-		if (glfwGetKey(window, i) == GLFW_PRESS)
-		{
-			inputBuffer.push(i);
-		}
-	}
+	KeyboardEvent ev;
+	ev.code = key;
+	ev.eventType = action;
+	inputBuffer.push(ev);
 }
 
 MainController::MainController()
@@ -53,11 +49,13 @@ bool MainController::Initialize()
 
 void MainController::MainLoop()
 {
+	glfwSetKeyCallback(wind->GetGLFWPointer(), ProcessInput);
 	while (!wind->ShouldClose())
 	{
+		timeNow = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count();
 		sceneController->UpdateScene();
 		wind->WindowLoop();
-		ProcessInput();
+		glfwPollEvents();
 		graphicsController->Render();
 	}
 }

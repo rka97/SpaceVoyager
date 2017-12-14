@@ -11,11 +11,15 @@ using namespace std;
 class Model
 {
 public:
-	Model(const string& name, const string& path, Material* mat, bool gamma = false);
+	Model(const string& name, const string& path, Material* mat, bool isInstanced = false, bool gamma = false);
+	Model(const string& name, Material* mat);
 	~Model();
-	virtual void Draw();
+	virtual void Draw(int numInstances = 1);
 	void Initialize();
-	bool SetParameterValue(string parameterName, void* parameterValue);
+	bool SetParameterValue(int id, void* parameterValue);
+	int GetParameterId(string parameterName);
+	Material* GetMaterial();
+	void InitializeInstanced(void* data, int numInstances);
 protected:
 	void LoadModel();
 	void ProcessNode(aiNode* node, const aiScene* scene);
@@ -35,4 +39,5 @@ protected:
 	map<string, Texture> loadedTextures; // maps all the loaded textures so far-- avoids reloading stuff.
 
 	bool gammaCorrection;
+	bool isInstanced;
 };

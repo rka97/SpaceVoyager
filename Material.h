@@ -26,11 +26,27 @@ public:
 	void SetTextures(vector<Texture>& tex);
 	void ActivateMaterial();
 	void BindTextures();
-	bool SetParameterValue(string parameterName, void* parameterValue);
-	int	 GetParameterLocation(string name);
-private:
+	bool SetParameterValue(int id, void* parameterValue);
+	int	GetParameterLocation(string name);
+	int	GetParameterID(string name);
+protected:
+	struct ShaderParameterData {
+		string name;
+		void* data;
+		ShaderParameterData(string name) {
+			this->name = name;
+			data = nullptr;
+		}
+		ShaderParameterData() {
+			data = nullptr;
+		}
+	};
+	bool SetParameterValue(string parameterName, void* parameter);
+	ShaderParameterData* GetShaderParameter(string parameterName);
+
 	string name;
 	ShaderProgram* shaderProgram; // is a pointer because many materials can share the same shader program.
 	vector<Texture> textures; // is not a pointer because it is expected that materials will not share the same shader program.
-	map<string, void*> shaderProgramParameters; // a string and a pointer to the data.
+	//map<string, void*> shaderProgramParameters; // a string and a pointer to the data.
+	vector<ShaderParameterData> shaderParameters;
 };

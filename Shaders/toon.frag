@@ -18,7 +18,7 @@ struct MaterialInfo
 	float Shininess;
 };
 
-layout (location = 6) uniform vec3 cameraPosition;
+layout (location = 6)  uniform vec3 cameraPosition;
 layout (location = 12) uniform sampler2D texture_diffuse1;
 layout (location = 13) uniform LightInfo light; // will take 13 and 14.
 layout (location = 15) uniform MaterialInfo material; // will take 15-18.
@@ -110,10 +110,10 @@ float IsEdge(in vec2 coords){
   return threshold(0.15,0.4,clamp(1.8*delta,0.0,1.0));
 }
 
-vec4 DiscretizeVec4 (in vec4 input, in int numLevels)
+vec4 DiscretizeVec4 (in vec4 _input, in int numLevels)
 {
 	float scaleFactor = 1.0 / numLevels;
-	vec4 discretizedOutput = input;
+	vec4 discretizedOutput = _input;
 	discretizedOutput.x = floor(discretizedOutput.x * numLevels) * scaleFactor;
 	discretizedOutput.y = floor(discretizedOutput.y * numLevels) * scaleFactor;
 	discretizedOutput.z = floor(discretizedOutput.z * numLevels) * scaleFactor;

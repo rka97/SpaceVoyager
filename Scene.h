@@ -7,27 +7,28 @@
 #include "SceneGraphicsInformation.h"
 #include <queue>
 #include <map>
+#include "Utility.h"
+#include "BulletsController.h"
 
 class Scene
 {
 	Camera* camera;
 	Light* mainLight;
 	SceneGraphicsInformation sceneGraphicsInfo;
-	map<string, SceneActor*> sceneActors;
-	queue<int>* inputBuffer;
+	map<string, Drawable*> sceneActors;
+	queue<KeyboardEvent>* inputBuffer;
 	bool editorMode;
 	void LoadActors();
 	void UpdateSceneGameMode();
-	void UpdateSceneEditMode();
 public:
 	Scene();
 	~Scene();
 	void Initialize();
 	void setEditorMode(bool editorMode);
 	void UpdateScene();
-	bool SetInputBuffer(queue<int>* inBuff);
+	bool SetInputBuffer(queue<KeyboardEvent>* inBuff);
 	Camera* GetSceneCamera();
 	Light* GetSceneLight();
-	SceneActor* GetActor(string name);
-	map<string, SceneActor*>* GetSceneActors();
+	Drawable* GetActor(string name);
+	map<string, Drawable*>* GetSceneActors();
 };
