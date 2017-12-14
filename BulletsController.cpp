@@ -72,10 +72,7 @@ void BulletsController::Draw(SceneInfo& sceneInfo, int stupid)
 	
 	int i = 0;
 	for (auto& bulletInfo : liveBullets) {
-		bulletPositions[i].x = bulletInfo->bullet->Position().x;
-		bulletPositions[i].y = bulletInfo->bullet->Position().y;
-		bulletPositions[i].z = bulletInfo->bullet->Position().z;
-
+		bulletPositions[i] = bulletInfo->bullet->Position();
 		i++;
 	}
 	liveBullets[0]->bullet->GetModel()->InitializeInstanced(this->bulletPositions, MAX_NUM_BULLETS);

@@ -14,15 +14,14 @@ public:
 	Model* GetModel();
 protected:
 	Model* model;
-private:
-	static int MODEL_VIEW;
-	static int PROJECTION;
-	static int MODEL_VIEW_NORMAL;
-	static int MODEL_VIEW_PROJECTION;
-	static int MODEL;
-	static int MODEL_NORMAL;
-	static int CAMERA_POSITION;
-	static int TEXTURE_DIFFUSE1;
-	static int LIGHT;
-	static int MATERIAL;
+	int modelView;
+	int projection;
+	int modelViewNormal;
+	int modelViewProjection;
+	int modelMatrix;
+	int modelNormal;
+	int cameraPosition;
+	int lightPosition;
+	int textureDiffuse1;
+	int lightIntensity;
 };

@@ -15,6 +15,8 @@ struct GravityCenter {
 };
 
 struct SceneInfo {
-	glm::mat4 View;
-	glm::mat4 Projection;
+	glm::mat4 view;
+	glm::mat4 projection;
+	glm::vec4 lightPosition;
+	glm::vec3 lightIntensity;
 };

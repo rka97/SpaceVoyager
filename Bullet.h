@@ -27,9 +27,6 @@ private:
 	glm::vec4 outerColor;
 	glm::vec4 middleColor;
 	
-	static int PROJECTION;
-	static int VIEW;
-	static int CENTER_WORLDSPACE;
 	static int SIZE;
 	static int INNER_RADIUS;
 	static int MIDDLE_RADIUS;
@@ -37,5 +34,7 @@ private:
 	static int INNER_COLOR;
 	static int MIDDLE_COLOR;
 	static int OUTER_COLOR;
+	static int VIEW;
+	static int PROJECTION;
 };
 

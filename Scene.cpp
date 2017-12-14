@@ -17,7 +17,7 @@ void Scene::LoadActors()
 	formation = new BulletsController();
 	sceneActors["Formation"] = formation;
 	SceneActor* sa = new SceneActor();
-	sa->SetModel(sceneGraphicsInfo.GetModel("Planet"));
+	sa->SetModel(sceneGraphicsInfo.GetModel("Saucer"));
 	sceneActors["Saucer"] = sa;
 
 	vector<Bullet*> bullets;
@@ -125,7 +125,6 @@ void Scene::UpdateSceneGameMode()
 			break;
 		case GLFW_KEY_X: 
 		{
-			
 			float tmpTheta = theta;
 			for (int i = 0; i < 10; i++) {
 				vec3 pos = vec3(cos(tmpTheta), sin(tmpTheta), 0) * 10.0f;
