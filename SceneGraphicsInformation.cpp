@@ -174,11 +174,11 @@ void SceneGraphicsInformation::LoadModels()
 	skyModel->Initialize();
 	models["Sky"] = skyModel;
 
-	Model* fighterModel = new Model("AK5", "models/SciFi/SciFi.obj", materials[materialName], false);
+	Model* fighterModel = new Model("AK5", "models/SciFi/SciFi.obj", materials[materialName]);
 	fighterModel->Initialize();
 	models["Fighter"] = fighterModel;
 
-	Model* planetModel = new Model("Planet", "models/planet/planet.obj", materials[materialName], false);
+	Model* planetModel = new Model("Planet", "models/planet/planet.obj", materials[materialName]);
 	planetModel->Initialize();
 	models["Planet"] = planetModel;
 	

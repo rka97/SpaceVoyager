@@ -16,9 +16,13 @@ void Scene::LoadActors()
 	lastUpdateTime = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count();
 	formation = new BulletsController();
 	sceneActors["Formation"] = formation;
-	SceneActor* sa = new SceneActor();
-	sa->SetModel(sceneGraphicsInfo.GetModel("Planet"));
-	sceneActors["Saucer"] = sa;
+	SceneActor* fighterActor = new SceneActor();
+	fighterActor->SetModel(sceneGraphicsInfo.GetModel("Fighter"));
+	sceneActors["Fighter1"] = fighterActor;
+	fighterActor->SetScale(vec3(0.008f));
+	fighterActor->RotateAroundUp(glm::radians(90.0f));
+	fighterActor->RotateAroundRight(glm::radians(90.0f));
+	fighterActor->RotateAroundForward(glm::radians(-90.0f));
 
 	vector<Bullet*> bullets;
 	for (int i = 0; i < 500; i++) {
@@ -124,8 +128,7 @@ void Scene::UpdateSceneGameMode()
 			camera->ZoomOut(glm::radians(1.0f));
 			break;
 		case GLFW_KEY_X: 
-		{
-			
+		{	
 			float tmpTheta = theta;
 			for (int i = 0; i < 10; i++) {
 				vec3 pos = vec3(cos(tmpTheta), sin(tmpTheta), 0) * 10.0f;

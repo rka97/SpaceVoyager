@@ -25,14 +25,16 @@ void Graphics::DrawScene()
 	Light* mainLight = scene->GetSceneLight();
 	map<string, Drawable*> sceneActors = *(scene->GetSceneActors());
 	float aspectratio = (float)frameBufferSize.x / frameBufferSize.y;
-	mat4 View = cam->GetViewMatrix();
+	mat4 view = cam->GetViewMatrix();
 	vec4 lightPosition = mainLight->GetLightPosition();
 	vec3 lightIntensity = vec3(1.0f);
 	vec3 cameraPosition = cam->Position();
 
-	mat4 Projection = cam->GetProjectionMatrix(aspectratio);
-	sceneInfo.View = View;
-	sceneInfo.Projection = Projection;
+	mat4 projection = cam->GetProjectionMatrix(aspectratio);
+	sceneInfo.view = view;
+	sceneInfo.projection = projection;
+	sceneInfo.lightPosition = lightPosition;
+	sceneInfo.lightIntensity = vec3(1.0f);
 
 	for (map<string, Drawable*>::iterator it = sceneActors.begin(); it != sceneActors.end(); it++)
 	{
