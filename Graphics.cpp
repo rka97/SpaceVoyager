@@ -12,8 +12,6 @@ using namespace std;
 using glm::vec3;
 using glm::vec4;
 
-SceneInfo sceneInfo;
-
 void Graphics::DirtyInitialize()
 {
 }
@@ -23,22 +21,24 @@ void Graphics::DrawScene()
 {
 	Camera* cam = scene->GetSceneCamera();
 	Light* mainLight = scene->GetSceneLight();
-	map<string, Drawable*> sceneActors = *(scene->GetSceneActors());
+	vector<Drawable*> sceneActors = scene->GetSceneActors();
 	float aspectratio = (float)frameBufferSize.x / frameBufferSize.y;
 	mat4 view = cam->GetViewMatrix();
 	vec4 lightPosition = mainLight->GetLightPosition();
-	vec3 lightIntensity = vec3(1.0f);
+	vec3 lightIntensity = vec3(2.0f);
 	vec3 cameraPosition = cam->Position();
 
 	mat4 projection = cam->GetProjectionMatrix(aspectratio);
+	
 	sceneInfo.view = view;
 	sceneInfo.projection = projection;
 	sceneInfo.lightPosition = lightPosition;
 	sceneInfo.lightIntensity = vec3(1.0f);
+	sceneInfo.cameraPosition = cameraPosition;
 
-	for (map<string, Drawable*>::iterator it = sceneActors.begin(); it != sceneActors.end(); it++)
+	for (vector<Drawable*>::iterator it = sceneActors.begin(); it != sceneActors.end(); it++)
 	{
-		Drawable* currentActor = it->second;
+		Drawable* currentActor = *it;
 		currentActor->Draw(sceneInfo);
 	}
 }
@@ -61,7 +61,7 @@ Graphics::~Graphics()
 
 void Graphics::Render()
 {
-	//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	DirtyRender();
 }
@@ -75,6 +75,7 @@ void Graphics::Initialize(unsigned int width, unsigned int height, Scene* scene)
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glfwWindowHint(GLFW_ALPHA_BITS, GL_TRUE);
 	if (scene == nullptr)
 	{
 		cout << "Error in Graphics::Initialize(int, int, Scene*): can't initialize with NULL scene!\n";

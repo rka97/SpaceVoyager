@@ -15,20 +15,16 @@ class Scene
 	Camera* camera;
 	Light* mainLight;
 	SceneGraphicsInformation sceneGraphicsInfo;
-	map<string, Drawable*> sceneActors;
+	vector<Drawable*> sceneActors;
 	queue<KeyboardEvent>* inputBuffer;
-	bool editorMode;
 	void LoadActors();
-	void UpdateSceneGameMode();
 public:
 	Scene();
 	~Scene();
 	void Initialize();
-	void setEditorMode(bool editorMode);
 	void UpdateScene();
 	bool SetInputBuffer(queue<KeyboardEvent>* inBuff);
 	Camera* GetSceneCamera();
 	Light* GetSceneLight();
-	Drawable* GetActor(string name);
-	map<string, Drawable*>* GetSceneActors();
+	vector<Drawable*> GetSceneActors();
 };

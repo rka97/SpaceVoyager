@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include "Utility.h"
 using namespace std;
 
 class Model
@@ -20,6 +21,7 @@ public:
 	int GetParameterId(string parameterName);
 	Material* GetMaterial();
 	void InitializeInstanced(void* data, int numInstances);
+	Box GetEnclosingBox();
 protected:
 	void LoadModel();
 	void ProcessNode(aiNode* node, const aiScene* scene);

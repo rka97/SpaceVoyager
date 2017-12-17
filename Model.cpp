@@ -339,3 +339,19 @@ void Model::InitializeInstanced(void * data, int numInstances)
 		mesh.InitializeInstanced(data, numInstances);
 	}
 }
+
+Box Model::GetEnclosingBox()
+{
+	if (meshes.empty()) return Box();
+	float minX = 9999, minY = 9999, minZ = 9999, maxX = -9999, maxY = -9999, maxZ = -9999;
+	for (auto& mesh : meshes) {
+		array<glm::vec3,2> vs = mesh.GetEnclosingBox();
+		if (vs[0].x < minX) minX = vs[0].x;
+		if (vs[1].x > maxX) maxX = vs[1].x;
+		if (vs[0].y < minY) minY = vs[0].y;
+		if (vs[1].y > maxY) maxY = vs[1].y;
+		if (vs[0].z < minZ) minZ = vs[0].z;
+		if (vs[1].z > maxZ) maxZ = vs[1].z;
+	}
+	return Box(glm::vec3(minX, minY, minZ), glm::vec3(maxX, maxY, maxZ));
+}

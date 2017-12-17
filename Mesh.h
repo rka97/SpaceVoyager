@@ -3,7 +3,9 @@
 #include <vector>
 #include "Shader.h"
 #include "Material.h"
-#include "glm\glm.hpp"
+#include "Utility.h"
+#include <array>
+
 using namespace std;
 
 struct Vertex {
@@ -23,6 +25,7 @@ public:
 	void Initialize();
 	void InitializeInstanced(void* data, int maxNumInstances);
 	virtual void Draw(int numInstances = 1);
+	array<glm::vec3, 2> GetEnclosingBox();
 private:
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;

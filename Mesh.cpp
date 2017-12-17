@@ -125,3 +125,18 @@ void Mesh::Draw(int numInstances)
 	glBindVertexArray(0);
 	glActiveTexture(GL_TEXTURE0);
 }
+
+array<glm::vec3, 2> Mesh::GetEnclosingBox()
+{
+	float minX = 9999, minY = 9999, minZ = 9999, maxX = -9999, maxY = -9999, maxZ = -9999;
+	for (auto& vertex : vertices) {
+		if (vertex.position.x < minX) minX = vertex.position.x;
+		if (vertex.position.x > maxX) maxX = vertex.position.x;
+		if (vertex.position.y < minY) minY = vertex.position.y;
+		if (vertex.position.y > maxY) maxY = vertex.position.y;
+		if (vertex.position.z < minZ) minZ = vertex.position.z;
+		if (vertex.position.z > maxZ) maxZ = vertex.position.z;
+	}
+	array<glm::vec3, 2> arr = { glm::vec3(minX, minY, minZ), glm::vec3(maxX, maxY, maxZ) };
+	return arr;
+}

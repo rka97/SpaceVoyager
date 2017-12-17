@@ -11,6 +11,8 @@ public:
 	virtual bool SetModel(Model* actorModel);
 	virtual void Draw(SceneInfo& sceneInfo, int numInstances);
 	bool SetParameterValue(int id, void* parameterValue);
+	Rectangle2D GetEnclosingRectangle();
+	void RecalculateBoundaries();
 	Model* GetModel();
 protected:
 	Model* model;
@@ -25,4 +27,6 @@ private:
 	int lightPosition;
 	int textureDiffuse1;
 	int lightIntensity;
+	Rectangle2D enclosingRectangle;
+	bool areBoundriesCalculated;
 };

@@ -162,9 +162,22 @@ void SceneGraphicsInformation::LoadModels()
 		return;
 	}
 
-	Model* shipModel = new Model("Imperial", "models/corvette/spaceship.obj", materials[materialName], false);
+	Model* planetModel = new Model("Planet", "models/planet/planet.obj", materials[materialName]);
+	planetModel->Initialize();
+	models["Planet"] = planetModel;
+
+	Model* shipModel = new Model("Imperial", "models/corvette/spaceship.obj", materials[materialName]);
 	shipModel->Initialize(); // actually loads the model.
 	models["Imperial"] = shipModel;
+
+	Model* saucerModel = new Model("Saucer", "models/saucer/Low_poly_UFO.obj", materials[materialName]);
+	saucerModel->Initialize();
+	models["Saucer"] = saucerModel;
+
+	/*
+	Model* fighterModel = new Model("AK5", "models/SciFi/SciFi.obj", materials[materialName]);
+	fighterModel->Initialize();
+	models["Fighter"] = fighterModel;
 
 	Model* rockModel = new Model("Rock", "models/meteor/meteor.obj", materials[materialName], false);
 	rockModel->Initialize();
@@ -174,18 +187,10 @@ void SceneGraphicsInformation::LoadModels()
 	skyModel->Initialize();
 	models["Sky"] = skyModel;
 
-	Model* fighterModel = new Model("AK5", "models/SciFi/SciFi.obj", materials[materialName]);
-	fighterModel->Initialize();
-	models["Fighter"] = fighterModel;
-
-	Model* planetModel = new Model("Planet", "models/planet/planet.obj", materials[materialName]);
-	planetModel->Initialize();
-	models["Planet"] = planetModel;
-	
-	Model* saucerModel = new Model("Saucer", "models/saucer/Low_poly_UFO.obj", materials[materialName]);
-	saucerModel->Initialize();
-	models["Saucer"] = saucerModel;
-
+	Model* earthModel = new Model("Earth", "models/earth/earth.obj", materials[materialName]);
+	earthModel->Initialize();
+	models["Earth"] = earthModel;
+	*/
 	BulletModel* bulletModel = new BulletModel("Bullet", materials["BulletMaterial"]);
 	models["Bullet"] = bulletModel;
 }

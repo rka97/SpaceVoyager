@@ -1,6 +1,4 @@
 #include "Bullet.h"
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/norm.hpp>
 
 int Bullet::PROJECTION = -1;
 int Bullet::VIEW = -1;
@@ -13,7 +11,7 @@ int Bullet::MIDDLE_COLOR = -1;
 int Bullet::OUTER_COLOR = -1;
 
 Bullet::Bullet(vec3 position, float innerRadius, float middleRadius, float outerRadius, glm::vec4 innerColor,
-	glm::vec4 middleColor, glm::vec4 outerColor)
+	glm::vec4 middleColor, glm::vec4 outerColor, glm::vec2 size)
 : SceneActor(position) { 
 	this->innerRadius = innerRadius;
 	this->middleRadius = middleRadius;
@@ -21,6 +19,7 @@ Bullet::Bullet(vec3 position, float innerRadius, float middleRadius, float outer
 	this->innerColor = innerColor;
 	this->middleColor = middleColor;
 	this->outerColor = outerColor;
+	this->size = size;
 }
 
 Bullet::~Bullet() { }
@@ -49,7 +48,7 @@ void Bullet::Draw(SceneInfo& sceneInfo, int numInstances) {
 	SetParameterValue(MIDDLE_RADIUS, &middleRadius);
 	SetParameterValue(INNER_COLOR, &innerColor);
 	SetParameterValue(MIDDLE_COLOR, &middleColor);
-	SetParameterValue(SIZE, &glm::vec2(1, 1));
+	SetParameterValue(SIZE, &size);
 	SetParameterValue(OUTER_COLOR, &outerColor);
 	SetParameterValue(OUTER_RADIUS, &outerRadius);
 	model->Draw(numInstances);
@@ -67,4 +66,13 @@ void Bullet::SetInnerColor(glm::vec4 innerColor) {
 }
 void Bullet::SetOuterColor(glm::vec4 outerColor) {
 	this->outerColor = outerColor;
+}
+
+void Bullet::SetMiddleColor(glm::vec4 middleColor) {
+	this->middleColor = middleColor;
+}
+
+void Bullet::SetSize(glm::vec2 size)
+{
+	this->size = size;
 }

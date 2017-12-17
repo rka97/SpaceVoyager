@@ -49,4 +49,6 @@ private:
 	
 	// Get the OpenGL Context Information.
 	GLContextInfo GetContextInfo();
+	SceneInfo sceneInfo;
+
 };
