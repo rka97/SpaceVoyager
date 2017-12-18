@@ -43,3 +43,5 @@ x64/
 *.tlog
 /x64/Debug
 /models/skybox
+/SpaceVoyager.vcxproj.filters
+/SpaceVoyager.vcxproj.user

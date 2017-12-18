@@ -112,7 +112,7 @@ void SceneGraphicsInformation::LoadMaterials()
 	}
 	Material* shipMaterial = new Material("ToonShip", shaderPrograms[progName]);
 	shipMaterial->Initialize();
-	vec3* materialAmbient = new vec3(0.3f);
+	vec3* materialAmbient = new vec3(1.5f);
 	vec3* materialDiffuse = new vec3(0.6f);
 	vec3* materialSpecular = new vec3(0.2f);
 	vec3* materialShininess = new vec3(32.0f);
@@ -121,8 +121,24 @@ void SceneGraphicsInformation::LoadMaterials()
 	shipMaterial->SetParameterValue(shipMaterial->GetParameterID("material.Kd"), materialDiffuse);
 	shipMaterial->SetParameterValue(shipMaterial->GetParameterID("material.Ks"), materialSpecular);
 	shipMaterial->SetParameterValue(shipMaterial->GetParameterID("material.Shininess"), materialShininess);
-	
+	createdParameters.push_back(materialAmbient);
+	createdParameters.push_back(materialDiffuse);
+	createdParameters.push_back(materialSpecular);
+	createdParameters.push_back(materialShininess);
+
 	materials["ToonShip"] = shipMaterial;
+
+	Material* planetMaterial = new Material("ToonPlanet", shaderPrograms[progName]);
+	planetMaterial->Initialize();
+	materialAmbient = new vec3(0.3f);
+	materialDiffuse = new vec3(0.6f);
+	materialSpecular = new vec3(0.2f);
+	materialShininess = new vec3(32.0f);
+	planetMaterial->SetParameterValue(planetMaterial->GetParameterID("material.Ka"), materialAmbient);
+	planetMaterial->SetParameterValue(planetMaterial->GetParameterID("material.Kd"), materialDiffuse);
+	planetMaterial->SetParameterValue(planetMaterial->GetParameterID("material.Ks"), materialSpecular);
+	planetMaterial->SetParameterValue(planetMaterial->GetParameterID("material.Shininess"), materialShininess);
+	materials["ToonPlanet"] = planetMaterial;
 
 	createdParameters.push_back(materialAmbient);
 	createdParameters.push_back(materialDiffuse);
@@ -161,25 +177,33 @@ void SceneGraphicsInformation::LoadModels()
 		cout << "Error in SceneGraphicsInformation::LoadModels(): trying to use material [" << materialName << "] which is not yet set!\n";
 		return;
 	}
+	string planetMatName = "ToonPlanet";
+	if (materials.find(planetMatName) == materials.end())
+	{
+		cout << "Error in SceneGraphicsInformation::LoadModels(): trying to use material [" << planetMatName << "] which is not yet set!\n";
+		return;
+	}
 
-	Model* planetModel = new Model("Planet", "models/planet/planet.obj", materials[materialName]);
+	/*
+	Model* planetModel = new Model("Planet", "models/planet/planet.obj", materials[planetMatName]);
 	planetModel->Initialize();
 	models["Planet"] = planetModel;
+	*/
 
 	Model* shipModel = new Model("Imperial", "models/corvette/spaceship.obj", materials[materialName]);
 	shipModel->Initialize(); // actually loads the model.
 	models["Imperial"] = shipModel;
 
-	Model* saucerModel = new Model("Saucer", "models/saucer/Low_poly_UFO.obj", materials[materialName]);
+	Model* saucerModel = new Model("Saucer", "models/saucer/Low_poly_UFO.obj", materials[planetMatName]);
 	saucerModel->Initialize();
 	models["Saucer"] = saucerModel;
 
 	/*
-	Model* fighterModel = new Model("AK5", "models/SciFi/SciFi.obj", materials[materialName]);
+	Model* fighterModel = new Model("AK5", "models/SciFi/SciFi.obj", materials[planetMatName]);
 	fighterModel->Initialize();
 	models["Fighter"] = fighterModel;
 
-	Model* rockModel = new Model("Rock", "models/meteor/meteor.obj", materials[materialName], false);
+	Model* rockModel = new Model("Rock", "models/meteor/meteor.obj", materials[planetMatName], false);
 	rockModel->Initialize();
 	models["Rock"] = rockModel;
 
@@ -187,7 +211,7 @@ void SceneGraphicsInformation::LoadModels()
 	skyModel->Initialize();
 	models["Sky"] = skyModel;
 
-	Model* earthModel = new Model("Earth", "models/earth/earth.obj", materials[materialName]);
+	Model* earthModel = new Model("Earth", "models/earth/earth.obj", materials[planetMatName]);
 	earthModel->Initialize();
 	models["Earth"] = earthModel;
 	*/

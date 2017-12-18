@@ -55,7 +55,6 @@ void MainController::MainLoop()
 		timeNow = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count();
 		sceneController->UpdateScene();
 		wind->WindowLoop();
-		glfwPollEvents();
 		graphicsController->Render();
 	}
 }

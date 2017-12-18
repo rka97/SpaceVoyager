@@ -1,5 +1,5 @@
 #include "PlanetBoss.h"
-
+#define planet_pattern_id 0
 
 PlanetBoss::PlanetBoss(SceneActor* sceneActor, BulletsController* bulletsController) : Enemy(sceneActor, bulletsController)
 {
@@ -23,15 +23,17 @@ PlanetBoss::PlanetBoss(SceneActor* sceneActor, BulletsController* bulletsControl
 
 void PlanetBoss::Update(vec3 pos) {
 	if (movementTime == -1)	Reset();
-	switch (mode) {
-	case NORMAL_MODE: {
+	switch (mode) 
+	{
+	case NORMAL_MODE: 
+	{
 		int dTSpiral = timeNow - spiralShootTime;
 		float tmpTheta = theta;
 		vec3 planetPos = sceneActor->Position();
 		if (dTSpiral >= spiralShootPeriod) {
 			for (int i = 0; i < 40; i++) {
 				glm::vec3 pos = vec3(cos(tmpTheta), sin(tmpTheta), 0);
-				bulletsController->ActivateBullet(Curvilinear, planetPos, pos * 10.0f, vec3(2), vec3(0, 0, 0), 30);
+				bulletsController->ActivateBullet(planet_pattern_id, Curvilinear, planetPos, pos * 10.0f, vec3(2), vec3(0, 0, 0), 30);
 				tmpTheta += 2 * M_PI / 40;
 			}
 			theta += 0.1;
@@ -46,7 +48,7 @@ void PlanetBoss::Update(vec3 pos) {
 
 			int initialSpeed = 40;
 			for (int i = 0; i < 10; i++) {
-				bulletsController->ActivateBullet(Curvilinear, sceneActor->Position() + dir, dir, vec3(0), vec3(0), initialSpeed + i);
+				bulletsController->ActivateBullet(planet_pattern_id, Curvilinear, sceneActor->Position() + dir, dir, vec3(0), vec3(0), initialSpeed + i);
 			}
 			directedShootTime = timeNow;
 		}
@@ -59,7 +61,8 @@ void PlanetBoss::Update(vec3 pos) {
 		}
 		break; 
 	}
-	case MOVE1_MODE: {
+	case MOVE1_MODE: 
+	{
 		int dT = timeNow - movementTime;
 		vec3 u = modePosition - sceneActor->Position();
 		sceneActor->SetPosition(sceneActor->Position() + normalize(u) * (0.1f * dT));
@@ -72,14 +75,15 @@ void PlanetBoss::Update(vec3 pos) {
 		}
 		break;
 	}
-	case CRAZY_MODE: {
+	case CRAZY_MODE: 
+	{
 		int dTSpiral = timeNow - spiralShootTime;
 		float tmpTheta = theta;
 		vec3 planetPos = sceneActor->Position();
 		if (dTSpiral >= crazySpiralShootPeriod) {
 			for (int i = 0; i < 20; i++) {
 				glm::vec3 pos = vec3(cos(tmpTheta), sin(tmpTheta), 0);
-				bulletsController->ActivateBullet(Curvilinear, planetPos, pos * 10.0f, vec3(2), vec3(0, 0, 0), 40);
+				bulletsController->ActivateBullet(planet_pattern_id, Curvilinear, planetPos, pos * 10.0f, vec3(2), vec3(0, 0, 0), 40);
 				tmpTheta += 2 * M_PI / 20;
 			}
 			theta += 0.1;
@@ -95,14 +99,16 @@ void PlanetBoss::Update(vec3 pos) {
 		}
 		break;
 	}
-	case WAIT_MODE: {
+	case WAIT_MODE: 
+	{
 		if(timeNow - waitTime >= waitPeriod){
 			mode = nxtMode;
 			Reset();
 		}
 		break;
 	}
-	case MOVE2_MODE: {
+	case MOVE2_MODE: 
+	{
 		if (movementTime == -1) { movementTime = timeNow; return; }
 		int dT = timeNow - movementTime;
 		if (moveMode) {

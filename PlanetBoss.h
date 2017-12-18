@@ -2,7 +2,6 @@
 #include "Enemy.h"
 class PlanetBoss : public Enemy
 {
-
 public:
 	PlanetBoss(SceneActor* sceneActor, BulletsController* bulletsController);
 	void Update(vec3 pos);

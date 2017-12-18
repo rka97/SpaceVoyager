@@ -96,7 +96,8 @@ void Scene::UpdateScene()
 	formation->Update();
 	planetBoss->Update(vec3(-3,-3,-100));
 	if (timeNow - playerShootTime >= playerShootPeriod) {
-		formation->PlayerAttack(playerShip->GetTransformationMatrix() * glm::vec4(0, 2.5f, 0.0f, 1.0f), 4, 0.3);
+		formation->Explosion(playerShip->GetTransformationMatrix() * glm::vec4(0, 2.5f, 0.0f, 1.0f), 40, 0.3);
+		// formation->Explosion(playerShip->GetTransformationMatrix() * glm::vec4(0, 2.5f, 0.0f, 1.0f), 40, 0.3);
 		playerShootTime = timeNow;
 	}
 
@@ -139,7 +140,7 @@ void Scene::UpdateScene()
 			mainLight->Move(camera->Down());
 			break;
 		case GLFW_KEY_X:
-			formation->ActivateShield(playerShip->Position(), vec3(0), vec3(0), 20, 0);
+			// formation->ActivateShield(playerShip->Position(), vec3(0), vec3(0), 20, 0);
 			break;
 		case GLFW_KEY_KP_ADD:
 			camera->ZoomIn(glm::radians(1.0f));
