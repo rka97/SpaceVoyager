@@ -1,7 +1,6 @@
 #include "BulletModel.h"
 #include <iostream>
-
-const static int NUM_OF_VERTICES = 20;
+const static int NUM_OF_VERTICES = 40;
 
 BulletModel::BulletModel(const string& name, Material* mat) : Model(name, mat)
 {

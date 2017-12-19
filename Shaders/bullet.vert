@@ -8,7 +8,7 @@ layout (location = 1) uniform mat4 Projection = mat4(1);
 layout (location = 2) uniform vec2 Size = vec2(1,1);
 layout (location = 3) uniform float Angle = 0;
 
-varying vec3 position;
+layout (location = 0) out vec3 position;
 
 void main()
 {

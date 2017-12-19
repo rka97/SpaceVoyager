@@ -174,7 +174,6 @@ bool BulletsController::Explosion(vec3 pos, int num, float angle)
 		patterns[2]->liveBullets.push_back(bi);
 		bi->bullet->SetPosition(pos);
 		bi->bullet->SetMiddleColor(vec4(0, 0, 1, 0.8));
-		bi->bullet->SetSize(vec3(3, 3, 3));
 
 		Differential* dif = nullptr;
 		if (bi->type != DIFFERENTIAL)
@@ -197,7 +196,7 @@ bool BulletsController::Explosion(vec3 pos, int num, float angle)
 		dif->update = Curvilinear;
 		bi->lifeTime = standardLifeTime;
 
-		bi->bullet->SetSize(vec2(2, 7));
+		bi->bullet->SetSize(vec2(7, 7));
 		thetaBegin += deltaT;
 	}
 	return true;
@@ -218,8 +217,10 @@ bool BulletsController::PlayerAttack(vec3 pos, int num, float angle)
 		admittedBullets.pop_back();
 		patterns[1]->liveBullets.push_back(bi);
 		bi->bullet->SetPosition(pos);
-		bi->bullet->SetMiddleColor(vec4(0, 0, 1, 0.8));
-		bi->bullet->SetSize(vec3(3, 3, 3));
+		bi->bullet->SetMiddleColor(vec4(0, 0, 0, 0));
+		bi->bullet->SetInnerColor(vec4(1.0, 1.0, 1.0, 1.0));
+		bi->bullet->SetOuterColor(vec4(0.282, 0.917, 0.447, 1.0));
+		bi->bullet->SetSize(vec2(2, 6));
 		
 		Differential* dif = nullptr;
 		if (bi->type != DIFFERENTIAL) 
@@ -241,7 +242,6 @@ bool BulletsController::PlayerAttack(vec3 pos, int num, float angle)
 		dif->update = Curvilinear;
 		bi->lifeTime = standardLifeTime;
 
-		bi->bullet->SetSize(vec2(2, 7));
 		thetaBegin += deltaT;
 	}
 	return true;

@@ -54,6 +54,22 @@ Model * SceneGraphicsInformation::GetModel(string modelName)
 
 void SceneGraphicsInformation::LoadShaderPrograms()
 {
+	ShaderProgram* skyShader = new ShaderProgram();
+	skyShader->Initialize();
+	skyShader->AddAndCompileShader("Shaders\\sky.vert", 'v');
+	skyShader->AddAndCompileShader("Shaders\\sky.frag", 'f');
+	skyShader->LinkProgram();
+	skyShader->AddParameter("in_position", 0, 1, SP_VEC3, GLSL_VAR_IN);
+	skyShader->AddParameter("ModelView", 0, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	skyShader->AddParameter("Projection", 1, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	skyShader->AddParameter("ModelViewNormal", 2, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	skyShader->AddParameter("ModelViewProjection", 3, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	skyShader->AddParameter("Model", 4, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	skyShader->AddParameter("ModelNormal", 5, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	skyShader->AddParameter("iTime", 6, 1, SP_FLOAT, GLSL_VAR_UNIFORM);
+	skyShader->AddParameter("iResolution", 7, 1, SP_VEC2, GLSL_VAR_UNIFORM);
+	shaderPrograms["Sky"] = skyShader;
+
 	ShaderProgram* toonShader = new ShaderProgram();
 	toonShader->Initialize();
 	toonShader->AddAndCompileShader("Shaders\\toon.vert", 'v');
@@ -145,24 +161,9 @@ void SceneGraphicsInformation::LoadMaterials()
 	createdParameters.push_back(materialSpecular);
 	createdParameters.push_back(materialShininess);
 
-	Material* skyMaterial = new Material("SkyProgram", shaderPrograms[progName]);
+	Material* skyMaterial = new Material("SkyMaterial", shaderPrograms["Sky"]);
 	skyMaterial->Initialize();
-	vec3* material2Ambient = new vec3(0.7f);
-	vec3* material2Diffuse = new vec3(0.0f);
-	vec3* material2Specular = new vec3(0.0f);
-	vec3* material2Shininess = new vec3(32.0f);
-	/*
-	skyMaterial->SetParameterValue("material.Ka", material2Ambient);
-	skyMaterial->SetParameterValue("material.Kd", material2Diffuse);
-	skyMaterial->SetParameterValue("material.Ks", material2Specular);
-	skyMaterial->SetParameterValue("material.Shininess", material2Shininess);
-	*/
 	materials["SkyMaterial"] = skyMaterial;
-
-	createdParameters.push_back(material2Ambient);
-	createdParameters.push_back(material2Diffuse);
-	createdParameters.push_back(material2Specular);
-	createdParameters.push_back(material2Shininess);
 
 	Material* bulletMaterial = new Material("BulletProgram", shaderPrograms["Bullet"]);
 	bulletMaterial->Initialize();
@@ -190,7 +191,7 @@ void SceneGraphicsInformation::LoadModels()
 	models["Planet"] = planetModel;
 	*/
 
-	Model* shipModel = new Model("Imperial", "models/corvette/spaceship.obj", materials[materialName]);
+	Model* shipModel = new Model("Imperial", "models/meteor/meteor.obj", materials[materialName]);
 	shipModel->Initialize(); // actually loads the model.
 	models["Imperial"] = shipModel;
 
@@ -207,14 +208,14 @@ void SceneGraphicsInformation::LoadModels()
 	rockModel->Initialize();
 	models["Rock"] = rockModel;
 
-	Model* skyModel = new Model("Sky", "models/skyplane/skyplane.obj", materials["SkyMaterial"], false);
-	skyModel->Initialize();
-	models["Sky"] = skyModel;
-
 	Model* earthModel = new Model("Earth", "models/earth/earth.obj", materials[planetMatName]);
 	earthModel->Initialize();
 	models["Earth"] = earthModel;
 	*/
 	BulletModel* bulletModel = new BulletModel("Bullet", materials["BulletMaterial"]);
 	models["Bullet"] = bulletModel;
+
+	Model* skyModel = new Model("Sky", "models/skyplane/skyplane_2.obj", materials["SkyMaterial"], false);
+	skyModel->Initialize();
+	models["Sky"] = skyModel;
 }

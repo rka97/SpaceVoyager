@@ -58,6 +58,11 @@ bool SceneActor::SetParameterValue(int id, void * parameterValue)
 	return model->SetParameterValue(id, parameterValue);
 }
 
+int SceneActor::GetParameterID(string name)
+{
+	return model->GetParameterId(name);
+}
+
 Rectangle2D SceneActor::GetEnclosingRectangle()
 {
 	RecalculateBoundaries();

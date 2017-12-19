@@ -12,11 +12,9 @@ layout (location = 5) uniform mat4 ModelNormal = mat4(1);
 
 layout (location = 0) out vec2 texCoordinates;
 layout (location = 1) out vec3 position;
-layout (location = 2) out vec3 normal;
 
 void main()
 {
-	normal = vec3(normalize(ModelNormal * vec4(in_normal, 0.0)));
 	position = vec3(Model * vec4(in_position, 1.0));
 	texCoordinates = in_texCoordinates;
 	gl_Position = ModelViewProjection * vec4(in_position, 1.0);

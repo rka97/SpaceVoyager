@@ -13,9 +13,12 @@ float dTheta = 0.1;
 SceneActor* planetActor;
 PlanetBoss* planetBoss;
 SceneActor* playerShip;
+SceneActor* skyActor;
 
 int playerShootTime = -1;
 int playerShootPeriod = 300;
+
+float time_now_f = 0;
 
 void Scene::LoadActors()
 {
@@ -41,13 +44,18 @@ void Scene::LoadActors()
 		bullet->SetSize(glm::vec2(3,3));
 	}
 	formation->AddBullets(bullets);
-
-	
 	planetBoss = new PlanetBoss(planetActor, formation);
 	
+	skyActor = new SceneActor();
+	skyActor->SetModel(sceneGraphicsInfo.GetModel("Sky"));
+	skyActor->SetPosition(vec3(0.0f, 0.0f, -180.0f));
+	skyActor->RotateAroundRight(glm::radians(90.0f));
+	skyActor->SetScale(vec3(15.0f));
+
 	sceneActors.push_back(planetActor);
 	sceneActors.push_back(playerShip);
 	sceneActors.push_back(formation);
+	sceneActors.push_back(skyActor);
 }
 
 
@@ -96,11 +104,13 @@ void Scene::UpdateScene()
 	formation->Update();
 	planetBoss->Update(vec3(-3,-3,-100));
 	if (timeNow - playerShootTime >= playerShootPeriod) {
-		formation->Explosion(playerShip->GetTransformationMatrix() * glm::vec4(0, 2.5f, 0.0f, 1.0f), 40, 0.3);
-		// formation->Explosion(playerShip->GetTransformationMatrix() * glm::vec4(0, 2.5f, 0.0f, 1.0f), 40, 0.3);
+		//formation->Explosion(playerShip->GetTransformationMatrix() * glm::vec4(0, 2.5f, 0.0f, 1.0f), 40, radians(360));
+		//formation->Explosion(playerShip->GetTransformationMatrix() * glm::vec4(0, 2.5f, 0.0f, 1.0f), 40, 0.3);
+		formation->PlayerAttack(playerShip->GetTransformationMatrix() * glm::vec4(0, 2.5f, 0.0f, 1.0f), 4, 0.3);
 		playerShootTime = timeNow;
 	}
-
+	time_now_f = (float)timeNow/1000;
+	skyActor->SetParameterValue(skyActor->GetParameterID("iTime"), &time_now_f);
 
 	Rectangle2D rect = planetActor->GetEnclosingRectangle();
 

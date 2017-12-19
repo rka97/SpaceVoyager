@@ -11,6 +11,7 @@ public:
 	virtual bool SetModel(Model* actorModel);
 	virtual void Draw(SceneInfo& sceneInfo, int numInstances);
 	bool SetParameterValue(int id, void* parameterValue);
+	int GetParameterID(string name);
 	Rectangle2D GetEnclosingRectangle();
 	void RecalculateBoundaries();
 	Model* GetModel();
