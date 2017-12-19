@@ -5,5 +5,5 @@
 - [ ] Add rotating pentagons under player model.
 - [ ] Make falling sharpnel.
 - [ ] Make explosion effect.
-- [ ] Change player model.
+- [x] Change player model.
 - [ ] Make a beam.

@@ -9,16 +9,6 @@ layout (location = 7) uniform vec4 InnerColor = vec4(1);
 layout (location = 8) uniform vec4 MiddleColor = vec4(1);
 layout (location = 9) uniform vec4 OuterColor = vec4(1);
 
-vec4 DiscretizeVec4 (in vec4 _input, in int numLevels)
-{
-	float scaleFactor = 1.0 / numLevels;
-	vec4 discretizedOutput = _input;
-	discretizedOutput.x = floor(discretizedOutput.x * numLevels) * scaleFactor;
-	discretizedOutput.y = floor(discretizedOutput.y * numLevels) * scaleFactor;
-	discretizedOutput.z = floor(discretizedOutput.z * numLevels) * scaleFactor;
-	return discretizedOutput;
-}
-
 void main()
 {
 	float radius = sqrt(position.x * position.x + position.y * position.y);

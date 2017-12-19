@@ -155,5 +155,5 @@ void main()
 		stars += step(.1,pow(noise(mod(vec2(uv.x*s + iTime*SPEED - fl*100.,uv.y*s),iResolution.x)),18.)) * (fl/float(LAYERS));
 	}
     
-	fragColor = GetWaterColor() * vec4( vec3(stars) + vec3(0, 0, 0.5), 1.0 );
+	fragColor = 1.2 * GetWaterColor() * vec4( vec3(stars) * vec3(0.949, 0.945, 0.172) + vec3(0.682, 0.196, 0.458), 1.0 );
 }
