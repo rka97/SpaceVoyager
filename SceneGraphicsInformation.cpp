@@ -128,7 +128,7 @@ void SceneGraphicsInformation::LoadMaterials()
 	}
 	Material* shipMaterial = new Material("ToonShip", shaderPrograms[progName]);
 	shipMaterial->Initialize();
-	vec3* materialAmbient = new vec3(1.5f);
+	vec3* materialAmbient = new vec3(0.6f);
 	vec3* materialDiffuse = new vec3(0.6f);
 	vec3* materialSpecular = new vec3(0.2f);
 	vec3* materialShininess = new vec3(32.0f);
@@ -191,7 +191,7 @@ void SceneGraphicsInformation::LoadModels()
 	models["Planet"] = planetModel;
 	*/
 
-	Model* shipModel = new Model("Imperial", "models/meteor/meteor.obj", materials[materialName]);
+	Model* shipModel = new Model("Imperial", "models/trident/trident.obj", materials[materialName]);
 	shipModel->Initialize(); // actually loads the model.
 	models["Imperial"] = shipModel;
 

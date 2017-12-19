@@ -30,9 +30,9 @@ void Scene::LoadActors()
 	playerShip->SetModel(sceneGraphicsInfo.GetModel("Imperial"));
 
 	playerShip->SetPosition(vec3(0.0f, 0.0f, -100.f));
-	playerShip->SetScale(vec3(8.0f));
+	playerShip->SetScale(vec3(1.5f));
 	playerShip->RotateAroundRight(glm::radians(90.0f));
-	playerShip->RotateAroundUp(glm::radians(180.0f));
+	//playerShip->RotateAroundUp(glm::radians(180.0f));
 
 	planetActor->RotateAroundRight(glm::radians(90.0f));
 
