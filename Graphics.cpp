@@ -61,7 +61,7 @@ Graphics::~Graphics()
 
 void Graphics::Render()
 {
-	glClearColor(0.043, 0.396, 0.537, 0.0f);
+	glClearColor(0, 0, 0, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	DirtyRender();
 }

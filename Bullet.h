@@ -11,7 +11,7 @@ public:
 		glm::vec4 middleColor = vec4(0.948,0.109,0,1411) , glm::vec4 outerColor = glm::vec4(1,0,0,0), glm::vec2 size = glm::vec2(5));
 	~Bullet();
 	void Draw(SceneInfo& sceneInfo, int numInstances = 1);
-
+	virtual float GetEnclosingRadius();
 	void SetInnerRadius(float innerRadius);
 	void SetOuterRadius(float outerRadius);
 	void SetInnerColor(glm::vec4 innerColor);
@@ -19,6 +19,9 @@ public:
 	void SetMiddleColor(glm::vec4 middleColor);
 	void SetSize(glm::vec2 size);
 	bool SetModel(Model* actorModel);
+	vec2 GetSize();
+	Rectangle2D GetEnclosingRectangle();
+
 
 private:
 	float innerRadius;

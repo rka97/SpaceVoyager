@@ -18,7 +18,7 @@ public:
 	vec3 Up() const;
 	vec3 Down() const;
 
-	void SetPosition(const vec3& positionVector);
+	virtual void SetPosition(const vec3& positionVector);
 	void SetScale(const vec3& scaleVector);
 	void SetRotation(const vec3& rotationVector);
 

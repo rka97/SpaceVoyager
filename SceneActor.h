@@ -12,9 +12,12 @@ public:
 	virtual void Draw(SceneInfo& sceneInfo, int numInstances);
 	bool SetParameterValue(int id, void* parameterValue);
 	int GetParameterID(string name);
-	Rectangle2D GetEnclosingRectangle();
-	void RecalculateBoundaries();
+	virtual Rectangle2D GetEnclosingRectangle();
+	virtual void RecalculateBoundaries();
 	Model* GetModel();
+	virtual bool CheckCollision(SceneActor* );
+	virtual float GetEnclosingRadius();
+	
 protected:
 	Model* model;
 private:
@@ -30,4 +33,5 @@ private:
 	int lightIntensity;
 	Rectangle2D enclosingRectangle;
 	bool areBoundriesCalculated;
+	Box* enclosingBox = nullptr;
 };

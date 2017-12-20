@@ -267,7 +267,7 @@ int ShaderProgram::GetParameterLocation(string name) {
 	for (auto& par : shaderInputParameters) {
 		if (par.name == name) return par.location;
 	}
-	cout << "Error in ShaderProgram::GetParameterLocation: parameter with name " << name << " not found in input parameters!\n";
+	//cout << "Error in ShaderProgram::GetParameterLocation: parameter with name " << name << " not found in input parameters!\n";
 	return -1;
 }
 

@@ -25,6 +25,14 @@ BulletsController::BulletsController() {
 	explosionPattern->bulletPositions = new vec3[MAX_PLAYER_BULLETS];
 	explosionPattern->numBullets = MAX_PLAYER_BULLETS;
 	patterns.push_back(explosionPattern);
+	BulletPattern* sharpnelPattern = new BulletPattern();
+	sharpnelPattern->bulletPositions = new vec3[MAX_NUM_BULLETS];
+	sharpnelPattern->numBullets = MAX_NUM_BULLETS;
+	patterns.push_back(sharpnelPattern);
+	BulletPattern* shieldPattern = new BulletPattern();
+	shieldPattern->bulletPositions = new vec3[3];
+	shieldPattern->numBullets = 3;
+	patterns.push_back(shieldPattern);
 	/* end shit-to-move */
 }
 
@@ -32,9 +40,15 @@ BulletsController::~BulletsController()
 {
 	for (auto& pattern : patterns)
 	{
+		for (auto& bullet : pattern->liveBullets)
+		{
+			delete bullet;
+		}
 		delete[] pattern->bulletPositions;
 		delete pattern;
 	}
+	for (auto& bullet : admittedBullets)
+		delete bullet;
 }
 
 void BulletsController::_Update(vector<BulletInfo*>& bullets, int realdT, float dT) {
@@ -58,7 +72,9 @@ void BulletsController::_Update(vector<BulletInfo*>& bullets, int realdT, float 
 			bi->lifeTime -= realdT;
 			break;
 		}
-		if (bi->lifeTime <= 0) {
+		// x [-245, 245] <- [0, 1024], y [-163,163] <- [0, 684]
+		auto bulletPos = bi->bullet->Position();
+		if (bi->type != EMPTY && (bi->lifeTime <= 0 || fabs(bulletPos.x) > 300 || fabs(bulletPos.y) > 250)) {
 			BulletInfo* bi2 = bullets.back();
 			bullets[i] = bi2;
 			admittedBullets.push_back(bi);
@@ -68,14 +84,27 @@ void BulletsController::_Update(vector<BulletInfo*>& bullets, int realdT, float 
 	}
 }
 
+vector<BulletInfo*> BulletsController::GetLiveBullets(int ID)
+{
+	if (ID < 0 || ID >= patterns.size())
+		return vector<BulletInfo*>();
+	return patterns[ID]->liveBullets;
+}
+
 void BulletsController::Update() {
 	int realdT = timeNow - lastUpdateTime;
 	float dT = realdT / 500.0f;
-	
+	int i = 0;
 	// Update all the patterns the bullets controller owns.
 	for (auto& pattern : patterns)
 	{
 		_Update(pattern->liveBullets, realdT, dT);
+		if (i == 4 && !pattern->liveBullets.empty())
+		{
+			pattern->liveBullets[0]->bullet->size *= 1.01f;
+			pattern->liveBullets[0]->bullet->outerColor.w *= 0.9f;
+		}
+		i++;
 	}
 
 	lastUpdateTime = timeNow;
@@ -94,7 +123,7 @@ void BulletsController::Draw(SceneInfo& sceneInfo, int stupid)
 			pattern->bulletPositions[i] = bulletInfo->bullet->Position();
 			i++;
 		}
-		pattern->liveBullets[0]->bullet->GetModel()->InitializeInstanced(pattern->bulletPositions, pattern->numBullets);
+		pattern->liveBullets[0]->bullet->GetModel()->InitializeInstanced(pattern->bulletPositions, pattern->liveBullets.size());
 		pattern->liveBullets[0]->bullet->Draw(sceneInfo, pattern->liveBullets.size());
 	}
 }
@@ -157,6 +186,15 @@ bool BulletsController::ActivateBullet(int patternID, std::function<vec3(float, 
 	return true;
 }
 
+void BulletsController::AddPattern(vector<BulletInfo*> activeBullets, int num)
+{
+	BulletPattern* pt = new BulletPattern;
+	pt->liveBullets = activeBullets;
+	pt->numBullets = num;
+	pt->bulletPositions = new vec3[num];
+	patterns.push_back(pt);
+}
+
 
 // Explosion of bullets
 bool BulletsController::PlayerExplosion(vec3 pos, int num, float angle)
@@ -173,9 +211,10 @@ bool BulletsController::PlayerExplosion(vec3 pos, int num, float angle)
 		admittedBullets.pop_back();
 		patterns[2]->liveBullets.push_back(bi);
 		bi->bullet->SetPosition(pos);
-		bi->bullet->SetMiddleColor(vec4(0.0f, 0.0f, 0.0f, 0.7f));
-		bi->bullet->SetInnerColor(vec4(1, 1, 1, 0.5f));
-		bi->bullet->SetOuterColor(vec4(0, 1, 0, 0.0f));
+		bi->bullet->SetInnerColor(vec4(0.588, 0.235, 0.572, 1.0));
+		bi->bullet->SetOuterColor(vec4(1.0, 1.0, 1.0, 1.0));
+		bi->bullet->SetMiddleColor(vec4(0.0, 0.0, 0.0, 0.8));
+
 		Differential* dif = nullptr;
 		if (bi->type != DIFFERENTIAL)
 		{
@@ -190,14 +229,150 @@ bool BulletsController::PlayerExplosion(vec3 pos, int num, float angle)
 			dif = (Differential*)bi->formationInfo;
 		}
 
-		dif->acceleration = vec3(1.0f);
+		dif->acceleration = vec3(0);
 		dif->velocity = vec3(cos(thetaBegin), sin(thetaBegin), 0);
 		dif->jerk = vec3(0);
-		dif->speed = 10 + rand() % 200;
+		dif->speed = 20 + rand() % 10;
 		dif->update = Curvilinear;
 		bi->lifeTime = standardLifeTime;
 
 		bi->bullet->SetSize(vec2(8, 8));
+		thetaBegin += deltaT;
+	}
+	return true;
+}
+
+
+// Explosion of bullets
+bool BulletsController::Shield(vec3 pos, int num, float angle)
+{
+	if (admittedBullets.size() < num || patterns[4]->liveBullets.size() >= patterns[4]->numBullets)
+		return false;
+
+	float thetaBegin = (M_PI - angle) / 2;
+	float deltaT = angle / (num - 1);
+
+	for (int i = 0; i < num; i++)
+	{
+		BulletInfo* bi = admittedBullets.back();
+		admittedBullets.pop_back();
+		patterns[4]->liveBullets.push_back(bi);
+		bi->bullet->SetPosition(pos);
+		bi->bullet->SetInnerColor(vec4(0.854, 0.086, 0.286, 1.0));
+		bi->bullet->SetOuterColor(1.05f * vec4(1, 1, 1, 1.0));
+		bi->bullet->SetMiddleColor(vec4(0.0, 0.0, 0.0, 0.9));
+
+		Differential* dif = nullptr;
+		if (bi->type != DIFFERENTIAL)
+		{
+			if (bi->formationInfo != nullptr)
+				delete bi->formationInfo;
+			dif = new Differential;
+			bi->formationInfo = dif;
+			bi->type = DIFFERENTIAL;
+		}
+		else
+		{
+			dif = (Differential*)bi->formationInfo;
+		}
+
+		dif->acceleration = vec3(0);
+		dif->velocity = vec3(cos(thetaBegin), sin(thetaBegin), 0);
+		dif->jerk = vec3(0);
+		dif->speed = 5 + rand() % 20;
+		dif->update = Curvilinear;
+		bi->lifeTime = standardLifeTime / 15;
+
+		bi->bullet->SetSize(vec2(20, 20));
+		thetaBegin += deltaT;
+	}
+	return true;
+}
+
+// Explosion of bullets
+bool BulletsController::BossExplosion(vec3 pos, int num, float angle)
+{
+	if (admittedBullets.size() < num || patterns[2]->liveBullets.size() >= patterns[2]->numBullets)
+		return false;
+
+	float thetaBegin = (M_PI - angle) / 2;
+	float deltaT = angle / (num - 1);
+
+	for (int i = 0; i < num; i++)
+	{
+		BulletInfo* bi = admittedBullets.back();
+		admittedBullets.pop_back();
+		patterns[2]->liveBullets.push_back(bi);
+		bi->bullet->SetPosition(pos);
+		bi->bullet->SetInnerColor(vec4(0.113, 0.145, 0.168, 1.0));
+		bi->bullet->SetOuterColor(vec4(1.0, 1.0, 1.0, 1.0));
+		bi->bullet->SetMiddleColor(vec4(0.0, 0.0, 0.0, 0.7));
+
+		Differential* dif = nullptr;
+		if (bi->type != DIFFERENTIAL)
+		{
+			if (bi->formationInfo != nullptr)
+				delete bi->formationInfo;
+			dif = new Differential;
+			bi->formationInfo = dif;
+			bi->type = DIFFERENTIAL;
+		}
+		else
+		{
+			dif = (Differential*)bi->formationInfo;
+		}
+
+		dif->acceleration = vec3(0);
+		dif->velocity = vec3(cos(thetaBegin), sin(thetaBegin), 0);
+		dif->jerk = vec3(0);
+		dif->speed = 20 + rand() % 10;
+		dif->update = Curvilinear;
+		bi->lifeTime = standardLifeTime;
+
+		bi->bullet->SetSize(vec2(15, 15));
+		thetaBegin += deltaT;
+	}
+	return true;
+}
+bool BulletsController::Sharpnel(vec3 pos, int num, float angle)
+{
+	if (admittedBullets.size() < num || patterns[3]->liveBullets.size() >= patterns[3]->numBullets)
+		return false;
+
+	float thetaBegin = (M_PI - angle) / 2;
+	float deltaT = angle / (num - 1);
+
+	for (int i = 0; i < num; i++)
+	{
+		BulletInfo* bi = admittedBullets.back();
+		admittedBullets.pop_back();
+		patterns[3]->liveBullets.push_back(bi);
+		bi->bullet->SetPosition(pos);
+		bi->bullet->SetMiddleColor(vec4(0, 0, 0, 0.5f));
+		bi->bullet->SetInnerColor(vec4(1.0, 1.0, 1.0, 1.0));
+		bi->bullet->SetOuterColor(vec4(1.0, 1.0, 0, 1.0));
+		bi->bullet->SetSize(vec2(0.25, 0.75));
+
+		Differential* dif = nullptr;
+		if (bi->type != DIFFERENTIAL)
+		{
+			if (bi->formationInfo != nullptr) delete bi->formationInfo;
+			dif = new Differential;
+			bi->formationInfo = dif;
+			bi->type = DIFFERENTIAL;
+		}
+		else
+		{
+			dif = (Differential*)bi->formationInfo;
+		}
+
+		dif->acceleration = vec3(0);
+		dif->velocity = vec3(cos(thetaBegin), -1.0f * sin(thetaBegin), 0);
+		dif->jerk = vec3(0);
+		dif->speed = 150 + rand() % 10;
+		dif->update = Curvilinear;
+		bi->lifeTime = standardLifeTime / 100;
+
 		thetaBegin += deltaT;
 	}
 	return true;

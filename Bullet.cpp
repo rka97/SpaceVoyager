@@ -41,6 +41,19 @@ bool Bullet::SetModel(Model* actorModel){
 	return true;
 }
 
+vec2 Bullet::GetSize()
+{
+	return size;
+}
+
+Rectangle2D Bullet::GetEnclosingRectangle()
+{
+	Rectangle2D rect;
+	rect.min = vec2(Position().x - size.x / 2, Position().y - size.y / 2);
+	rect.max = vec2(Position().x + size.x / 2, Position().y + size.y / 2);
+	return rect;
+}
+
 void Bullet::Draw(SceneInfo& sceneInfo, int numInstances) {
 	SetParameterValue(PROJECTION, &sceneInfo.projection);
 	SetParameterValue(VIEW, &sceneInfo.view);
@@ -52,6 +65,11 @@ void Bullet::Draw(SceneInfo& sceneInfo, int numInstances) {
 	SetParameterValue(OUTER_COLOR, &outerColor);
 	SetParameterValue(OUTER_RADIUS, &outerRadius);
 	model->Draw(numInstances);
+}
+
+float Bullet::GetEnclosingRadius()
+{
+	return size.x * outerRadius / 2.0f;
 }
 
 

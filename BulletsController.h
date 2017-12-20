@@ -23,10 +23,16 @@ public:
 	bool ActivateBullet(int patternID, const std::function<vec3(float&, vec3&, vec3&, vec3&)>&, float initialT = 0, vec3 center = vec3(0), vec3 rightVector = vec3(1, 0, 0), vec3 upVector = vec3(0, 1, 0));
 	bool ActivateBullet(int patternID, std::function<vec3(float, vec3&, vec3&, vec3&, float&)> func, vec3 initialPos, vec3 velocity, vec3 acceleration, vec3 jerk, float speed = -1);
 
+	void AddPattern(vector<BulletInfo*> activeBullets, int num);
+
 	bool PlayerAttack(vec3 pos, int num, float angle);
 	bool PlayerExplosion(vec3 pos, int num, float angle);
+	bool Sharpnel(vec3 pos, int num, float angle);
+	bool BossExplosion(vec3 pos, int num, float angle);
+	bool Shield(vec3 pos, int num, float angle);
 
 	void Draw(SceneInfo& sceneInfo, int stupid = 0);
+	vector<BulletInfo*> GetLiveBullets(int);
 
 private:
 	void _Update(vector<BulletInfo*>& bullets, int realdT, float dT);

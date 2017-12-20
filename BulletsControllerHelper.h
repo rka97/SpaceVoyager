@@ -2,26 +2,6 @@
 #include "Bullet.h"
 #define default_standard_lifetime 10000
 
-enum FormationType {
-	DIFFERENTIAL, PARAMETRIC, EMPTY
-};
-
-struct BulletInfo {
-	Bullet* bullet;
-	FormationType type = EMPTY;
-	void* formationInfo = nullptr;
-	int maxLifeTime;
-	int lifeTime = default_standard_lifetime;
-	float initialSize;
-	float maximumSize;
-};
-
-struct BulletPattern
-{
-	vec3* bulletPositions;
-	vector<BulletInfo*> liveBullets;
-	int numBullets;
-};
 
 
 struct Differential {
@@ -55,4 +35,35 @@ struct Parametric {
 		this->update = func;
 	}
 	Parametric() {}
+};
+
+enum FormationType {
+	DIFFERENTIAL, PARAMETRIC, EMPTY
+};
+
+struct BulletInfo {
+	~BulletInfo()
+	{
+		if (type != EMPTY && formationInfo != nullptr)
+		{
+			if (type == DIFFERENTIAL)
+				delete (Differential*)formationInfo;
+			else
+				delete (Parametric*)formationInfo;
+		}
+	}
+	Bullet* bullet;
+	FormationType type = EMPTY;
+	void* formationInfo = nullptr;
+	int maxLifeTime;
+	int lifeTime = default_standard_lifetime;
+	float initialSize;
+	float maximumSize;
+};
+
+struct BulletPattern
+{
+	vec3* bulletPositions;
+	vector<BulletInfo*> liveBullets;
+	int numBullets;
 };

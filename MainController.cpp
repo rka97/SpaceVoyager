@@ -59,11 +59,33 @@ void MainController::MainLoop()
 {
 	glfwSetKeyCallback(wind->GetGLFWPointer(), ProcessInput);
 	glfwSetCursorPosCallback(wind->GetGLFWPointer(), ProcessCursorInput);
+	
+	while (!wind->ShouldClose() && glfwGetKey(wind->GetGLFWPointer(), GLFW_KEY_ENTER) != GLFW_PRESS)
+	{
+		timeNow = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count();
+		wind->WindowLoop();
+		graphicsController->Render();
+	}
+	sceneController->LoadActors();
+	int timer = -1;
+	while (!wind->ShouldClose() && timer != 0)
+	{
+		timeNow = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count();
+		wind->WindowLoop();
+		if (!sceneController->UpdateScene())
+		{
+			if (timer < 0)
+				timer = 400; // find a way to properly set this
+		}
+		timer--;
+		graphicsController->Render();
+	}
+	sceneController->FinalLoad();
 	while (!wind->ShouldClose())
 	{
 		timeNow = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count();
-		sceneController->UpdateScene();
 		wind->WindowLoop();
+		glfwPollEvents();
 		graphicsController->Render();
 	}
 }

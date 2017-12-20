@@ -19,6 +19,8 @@ PlanetBoss::PlanetBoss(SceneActor* sceneActor, BulletsController* bulletsControl
 	crazyNumberOfBullets = 500;
 	mode = NORMAL_MODE;
 	numBulletsShot = 0;
+	maximumHealth = 30000;
+	health = maximumHealth;
 	flag = true;
 }
 
@@ -146,6 +148,18 @@ void PlanetBoss::Reset() {
 void PlanetBoss::SetCrazyMode() {
 	this->mode = MOVE1_MODE;
 	Reset();
+}
+bool PlanetBoss::Decrementhealth(int dec)
+{
+	health -= dec;
+	if (health <= 0)
+		return false;
+	return true;
+}
+
+int PlanetBoss::GetHealth()
+{
+	return health;
 }
 
 void PlanetBoss::inModeUpdate() {}

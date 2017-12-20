@@ -41,7 +41,7 @@ GLFWwindow * Window::GetGLFWPointer()
 
 bool Window::ShouldClose()
 {
-	shouldClose = shouldClose || glfwWindowShouldClose(window);
+	shouldClose = shouldClose || glfwGetKey(this->window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(window);
 	return shouldClose;
 }
 

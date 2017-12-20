@@ -2,12 +2,16 @@
 #include "Enemy.h"
 class PlanetBoss : public Enemy
 {
+	friend class Scene;
 public:
 	PlanetBoss(SceneActor* sceneActor, BulletsController* bulletsController);
 	void Update(vec3 pos);
 	void inModeUpdate();
 	void SetCrazyMode();
 	~PlanetBoss();
+	bool Decrementhealth(int dec = 1);
+	int GetHealth();
+	
 private:
 	void Reset();
 	enum Mode{
@@ -35,6 +39,6 @@ private:
 	int crazyNumberOfBullets;
 	int numBulletsShot;
 	bool flag = false;
-	
+	int health;
 };
 

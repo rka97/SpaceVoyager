@@ -16,3 +16,8 @@ glm::vec3 Enemy::GetPosition()
 {
 	return sceneActor->Position();
 }
+
+int Enemy::GetMaxHealth()
+{
+	return maximumHealth;
+}

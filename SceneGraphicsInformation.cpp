@@ -54,6 +54,22 @@ Model * SceneGraphicsInformation::GetModel(string modelName)
 
 void SceneGraphicsInformation::LoadShaderPrograms()
 {
+	ShaderProgram* healthBarShader = new ShaderProgram();
+	healthBarShader->Initialize();
+	healthBarShader->AddAndCompileShader("Shaders\\health_bar.vert", 'v');
+	healthBarShader->AddAndCompileShader("Shaders\\health_bar.frag", 'f');
+	healthBarShader->LinkProgram();
+	healthBarShader->AddParameter("in_position", 0, 1, SP_VEC3, GLSL_VAR_IN);
+	healthBarShader->AddParameter("ModelView", 0, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	healthBarShader->AddParameter("Projection", 1, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	healthBarShader->AddParameter("ModelViewNormal", 2, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	healthBarShader->AddParameter("ModelViewProjection", 3, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	healthBarShader->AddParameter("Model", 4, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	healthBarShader->AddParameter("ModelNormal", 5, 1, SP_MAT4, GLSL_VAR_UNIFORM);
+	healthBarShader->AddParameter("health", 6, 1, SP_INT, GLSL_VAR_UNIFORM);
+	healthBarShader->AddParameter("maxHealth", 7, 1, SP_INT, GLSL_VAR_UNIFORM);
+	shaderPrograms["HealthBar"] = healthBarShader;
+
 	ShaderProgram* skyShader = new ShaderProgram();
 	skyShader->Initialize();
 	skyShader->AddAndCompileShader("Shaders\\sky.vert", 'v');
@@ -168,6 +184,14 @@ void SceneGraphicsInformation::LoadMaterials()
 	Material* bulletMaterial = new Material("BulletProgram", shaderPrograms["Bullet"]);
 	bulletMaterial->Initialize();
 	materials["BulletMaterial"] = bulletMaterial;
+
+	Material* healthBarMaterial = new Material("HealthBar", shaderPrograms["HealthBar"]);
+	healthBarMaterial->Initialize();
+	materials["HealthBarMaterial"] = healthBarMaterial;
+
+	Material* shieldBarMaterial = new Material("ShieldBar", shaderPrograms["HealthBar"]);
+	healthBarMaterial->Initialize();
+	materials["ShieldBarMaterial"] = healthBarMaterial;
 }
 
 void SceneGraphicsInformation::LoadModels()
@@ -190,6 +214,15 @@ void SceneGraphicsInformation::LoadModels()
 	planetModel->Initialize();
 	models["Planet"] = planetModel;
 	*/
+
+
+	Model* startscreenModel = new Model("Start", "models/StartGame/Start Game.obj", materials[materialName]);
+	startscreenModel->Initialize();
+	models["Start"] = startscreenModel;
+
+	Model* gameoverModel = new Model("GameOver", "models/gameOveer/gameOver.obj", materials[materialName]);
+	gameoverModel->Initialize();
+	models["GameOver"] = gameoverModel;
 
 	Model* shipModel = new Model("Imperial", "models/trident/trident.obj", materials[materialName]);
 	shipModel->Initialize(); // actually loads the model.
@@ -218,4 +251,12 @@ void SceneGraphicsInformation::LoadModels()
 	Model* skyModel = new Model("Sky", "models/skyplane/skyplane_2.obj", materials["SkyMaterial"], false);
 	skyModel->Initialize();
 	models["Sky"] = skyModel;
+
+	Model* healthBarModel = new Model("HealthBar", "models/skyplane/skyplane_2.obj", materials["HealthBarMaterial"], false);
+	healthBarModel->Initialize();
+	models["HealthBar"] = healthBarModel;
+
+	Model* shieldBarModel = new Model("ShieldBar", "models/skyplane/skyplane_2.obj", materials["ShieldBarMaterial"], false);
+	shieldBarModel->Initialize();
+	models["ShieldBar"] = shieldBarModel;
 }

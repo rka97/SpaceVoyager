@@ -10,7 +10,7 @@ public:
 	void SetSceneActor(SceneActor* sceneActor);
 	glm::vec3 GetPosition();
 	virtual void Update(glm::vec3 pos) = 0;
-
+	int GetMaxHealth();
 protected:
 	int maximumHealth;
 	int currentHealth;
