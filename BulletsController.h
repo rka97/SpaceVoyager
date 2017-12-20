@@ -8,7 +8,7 @@
 #include "BulletsControllerHelper.h"
 
 #define MAX_NUM_BULLETS 1500
-#define MAX_PLAYER_BULLETS 400
+#define MAX_PLAYER_BULLETS 2000
 
 class BulletsController : public Drawable
 {
@@ -24,7 +24,7 @@ public:
 	bool ActivateBullet(int patternID, std::function<vec3(float, vec3&, vec3&, vec3&, float&)> func, vec3 initialPos, vec3 velocity, vec3 acceleration, vec3 jerk, float speed = -1);
 
 	bool PlayerAttack(vec3 pos, int num, float angle);
-	bool Explosion(vec3 pos, int num, float angle);
+	bool PlayerExplosion(vec3 pos, int num, float angle);
 
 	void Draw(SceneInfo& sceneInfo, int stupid = 0);
 

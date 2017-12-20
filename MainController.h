@@ -21,6 +21,8 @@ private:
 	Graphics* graphicsController;
 	Scene* sceneController;
 	static queue<KeyboardEvent> inputBuffer;
+	static MouseChange mouseListener;
 	static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods);
+	static void ProcessCursorInput(GLFWwindow* window, double xpos, double ypos);
 };
 

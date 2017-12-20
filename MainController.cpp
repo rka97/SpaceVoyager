@@ -3,7 +3,7 @@
 using namespace std;
 
 queue<KeyboardEvent> MainController::inputBuffer;
-
+MouseChange MainController::mouseListener;
 long long timeNow;
 
 void MainController::ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -14,12 +14,20 @@ void MainController::ProcessInput(GLFWwindow* window, int key, int scancode, int
 	inputBuffer.push(ev);
 }
 
+void MainController::ProcessCursorInput(GLFWwindow * window, double xpos, double ypos)
+{
+	mouseListener.prevPosition = mouseListener.position;
+	mouseListener.position = vec2(xpos, ypos);
+	mouseListener.changed = true;
+}
+
 MainController::MainController()
 {
 	this->wind = new Window(40, 40, 1024, 684, "Space Voyager");
 	graphicsController = new Graphics();
 	this->sceneController = new Scene();
 	sceneController->SetInputBuffer(&inputBuffer);
+	sceneController->SetMouseListener(&this->mouseListener);
 }
 
 
@@ -50,6 +58,7 @@ bool MainController::Initialize()
 void MainController::MainLoop()
 {
 	glfwSetKeyCallback(wind->GetGLFWPointer(), ProcessInput);
+	glfwSetCursorPosCallback(wind->GetGLFWPointer(), ProcessCursorInput);
 	while (!wind->ShouldClose())
 	{
 		timeNow = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count();

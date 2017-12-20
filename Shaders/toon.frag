@@ -137,8 +137,11 @@ void main()
 
 	float val_isEdge = 1 - IsEdge(texCoordinates);
 	vec4 edge_clr = vec4(val_isEdge, val_isEdge, val_isEdge, 1.0);
+	vec4 outputColor;
 	if (val_isEdge < 0.3)
-		out_color = edge_clr;
+		outputColor = edge_clr;
 	else
-		out_color = toonShadingColor * texColor;
+		outputColor = toonShadingColor * texColor;
+	outputColor.w = 1.0;
+	out_color = outputColor;
 }

@@ -8,7 +8,7 @@
 #include <queue>
 #include <map>
 #include "Utility.h"
-#include "BulletsController.h"
+#include "BulletsController.h"8
 
 class Scene
 {
@@ -17,6 +17,8 @@ class Scene
 	SceneGraphicsInformation sceneGraphicsInfo;
 	vector<Drawable*> sceneActors;
 	queue<KeyboardEvent>* inputBuffer;
+	MouseChange* mouseListener;
+	int keyStates[256];
 	void LoadActors();
 public:
 	Scene();
@@ -24,7 +26,10 @@ public:
 	void Initialize();
 	void UpdateScene();
 	bool SetInputBuffer(queue<KeyboardEvent>* inBuff);
+	bool SetMouseListener(MouseChange* chg);
 	Camera* GetSceneCamera();
 	Light* GetSceneLight();
 	vector<Drawable*> GetSceneActors();
+	void UpdateKeyboardInput();
+	void UpdateMouseInput();
 };

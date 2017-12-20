@@ -22,6 +22,7 @@ bool Window::Initialize()
 	}
 	glfwMakeContextCurrent(window);
 	glfwSetWindowPos(window, offsetX, offsetY);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	Resize(this->width, this->height);
 	return true;
 }

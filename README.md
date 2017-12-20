@@ -2,8 +2,8 @@
 
 # To-do
 - [x] Add moving sky.
-- [ ] Add rotating pentagons under player model.
-- [ ] Make falling sharpnel.
-- [ ] Make explosion effect.
 - [x] Change player model.
+- [ ] Make explosion effect.
+- [ ] Make falling sharpnel.
+- [ ] Add rotating pentagons under player model.
 - [ ] Make a beam.

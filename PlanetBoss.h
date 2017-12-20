@@ -25,6 +25,7 @@ private:
 	long long movementTime;
 	long long waitTime;
 	long long crazyTime;
+	long long lastTime;
 	int spiralShootPeriod;
 	int crazySpiralShootPeriod;
 	int crazyPeriod;

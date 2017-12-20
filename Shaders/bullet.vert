@@ -18,7 +18,7 @@ void main()
 	float c = cos(Angle);
 	float s = sin(Angle);
 	relpos = vec4(relpos.x * c - relpos.y * s, relpos.x * s + relpos.y * c, in_position.z, 1);
-	gl_Position = Projection * View *(vec4(Center_worldspace, 1) + relpos);
+	gl_Position = Projection * View *(vec4(Center_worldspace, 0.0) + relpos);
 	//vColor = in_vertexColor;
 	position = in_position;
 }

@@ -19,7 +19,7 @@ BulletsController::BulletsController() {
 	patterns.push_back(enemyPattern);
 	BulletPattern* playerPattern = new BulletPattern();
 	playerPattern->bulletPositions = new vec3[MAX_PLAYER_BULLETS];
-	enemyPattern->numBullets = MAX_PLAYER_BULLETS;
+	playerPattern->numBullets = MAX_PLAYER_BULLETS;
 	patterns.push_back(playerPattern);
 	BulletPattern* explosionPattern = new BulletPattern();
 	explosionPattern->bulletPositions = new vec3[MAX_PLAYER_BULLETS];
@@ -94,7 +94,7 @@ void BulletsController::Draw(SceneInfo& sceneInfo, int stupid)
 			pattern->bulletPositions[i] = bulletInfo->bullet->Position();
 			i++;
 		}
-		pattern->liveBullets[0]->bullet->GetModel()->InitializeInstanced(pattern->bulletPositions, pattern->liveBullets.size());
+		pattern->liveBullets[0]->bullet->GetModel()->InitializeInstanced(pattern->bulletPositions, pattern->numBullets);
 		pattern->liveBullets[0]->bullet->Draw(sceneInfo, pattern->liveBullets.size());
 	}
 }
@@ -130,7 +130,6 @@ bool BulletsController::ActivateBullet(int patternID, std::function<vec3(float, 
 	BulletInfo* bi = admittedBullets.back();
 	admittedBullets.pop_back();
 	pattern->liveBullets.push_back(bi);
-	bi->bullet->SetPosition(initialPos);
 
 	Differential* dif = nullptr;
 	if (bi->type != DIFFERENTIAL) 
@@ -150,7 +149,8 @@ bool BulletsController::ActivateBullet(int patternID, std::function<vec3(float, 
 	dif->jerk = jerk;
 	dif->speed = speed;
 	dif->update = func;
-	
+
+	bi->bullet->SetPosition(initialPos);
 	bi->bullet->SetMiddleColor(vec4(1, 0, 0, 1));
 	bi->bullet->SetSize(vec2(3, 3));
 	bi->lifeTime = standardLifeTime;
@@ -159,7 +159,7 @@ bool BulletsController::ActivateBullet(int patternID, std::function<vec3(float, 
 
 
 // Explosion of bullets
-bool BulletsController::Explosion(vec3 pos, int num, float angle)
+bool BulletsController::PlayerExplosion(vec3 pos, int num, float angle)
 {
 	if (admittedBullets.size() < num || patterns[2]->liveBullets.size() >= patterns[2]->numBullets)
 		return false;
@@ -173,8 +173,9 @@ bool BulletsController::Explosion(vec3 pos, int num, float angle)
 		admittedBullets.pop_back();
 		patterns[2]->liveBullets.push_back(bi);
 		bi->bullet->SetPosition(pos);
-		bi->bullet->SetMiddleColor(vec4(0, 0, 1, 0.8));
-
+		bi->bullet->SetMiddleColor(vec4(0.0f, 0.0f, 0.0f, 0.7f));
+		bi->bullet->SetInnerColor(vec4(1, 1, 1, 0.5f));
+		bi->bullet->SetOuterColor(vec4(0, 1, 0, 0.0f));
 		Differential* dif = nullptr;
 		if (bi->type != DIFFERENTIAL)
 		{
@@ -189,14 +190,14 @@ bool BulletsController::Explosion(vec3 pos, int num, float angle)
 			dif = (Differential*)bi->formationInfo;
 		}
 
-		dif->acceleration = vec3(0);
+		dif->acceleration = vec3(1.0f);
 		dif->velocity = vec3(cos(thetaBegin), sin(thetaBegin), 0);
 		dif->jerk = vec3(0);
-		dif->speed = 80 + rand() % 10;
+		dif->speed = 10 + rand() % 200;
 		dif->update = Curvilinear;
 		bi->lifeTime = standardLifeTime;
 
-		bi->bullet->SetSize(vec2(7, 7));
+		bi->bullet->SetSize(vec2(8, 8));
 		thetaBegin += deltaT;
 	}
 	return true;
@@ -205,7 +206,7 @@ bool BulletsController::Explosion(vec3 pos, int num, float angle)
 // Standard attack of bullets
 bool BulletsController::PlayerAttack(vec3 pos, int num, float angle)
 {
-	if (admittedBullets.size() < num) 
+	if (admittedBullets.size() < num || patterns[1]->liveBullets.size() >= patterns[1]->numBullets)
 		return false;
 
 	float thetaBegin = (M_PI - angle) / 2;
@@ -217,7 +218,7 @@ bool BulletsController::PlayerAttack(vec3 pos, int num, float angle)
 		admittedBullets.pop_back();
 		patterns[1]->liveBullets.push_back(bi);
 		bi->bullet->SetPosition(pos);
-		bi->bullet->SetMiddleColor(vec4(0, 0, 0, 0));
+		bi->bullet->SetMiddleColor(vec4(0, 0, 0, 0.75f));
 		bi->bullet->SetInnerColor(vec4(1.0, 1.0, 1.0, 1.0));
 		bi->bullet->SetOuterColor(vec4(0.282, 0.917, 0.447, 1.0));
 		bi->bullet->SetSize(vec2(2, 6));

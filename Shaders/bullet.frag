@@ -9,6 +9,8 @@ layout (location = 7) uniform vec4 InnerColor = vec4(1);
 layout (location = 8) uniform vec4 MiddleColor = vec4(1);
 layout (location = 9) uniform vec4 OuterColor = vec4(1);
 
+layout (location = 0) out vec4 out_color;
+
 void main()
 {
 	float radius = sqrt(position.x * position.x + position.y * position.y);
@@ -17,11 +19,18 @@ void main()
 	{
 		color = vec4(0.0, 0.0, 0.0, 1.0);
 	}
-	else if (radius >= 0.65f * OuterRadius && MiddleColor == vec4(0)) /* interpolate color if 0 */
+	else if (vec3(MiddleColor) == vec3(0, 0, 0) && radius >= 0.2 * OuterRadius) /* interpolate color if 0 */
 	{
-		vec4 slope = (OuterColor - InnerColor) / (OuterRadius - InnerRadius);
-		vec4 intercept = InnerColor - slope * InnerRadius;
-		color = radius * slope + intercept;
+		if (radius >= MiddleColor.w * OuterRadius)
+		{
+			vec4 slope = (OuterColor - InnerColor) / (OuterRadius - InnerRadius);
+			vec4 intercept = InnerColor - slope * InnerRadius;
+			color = radius * slope + intercept;
+		}
+		else
+		{
+			color = InnerColor;
+		}
 	}
 	else
 	{
@@ -32,5 +41,5 @@ void main()
 			color = MiddleColor;
 		}
 	}
-	gl_FragColor = color;
+	out_color = color;
 }

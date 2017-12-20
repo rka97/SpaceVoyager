@@ -6,6 +6,13 @@
 
 extern long long timeNow;
 
+struct MouseChange
+{
+	glm::vec2 position;
+	glm::vec2 prevPosition;
+	bool changed;
+};
+
 struct KeyboardEvent {
 	int code;
 	int eventType;

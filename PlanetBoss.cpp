@@ -9,6 +9,7 @@ PlanetBoss::PlanetBoss(SceneActor* sceneActor, BulletsController* bulletsControl
 	spiralShootPeriod = 1500;
 	crazySpiralShootPeriod = 100;
 	directedShootPeriod = 300;
+	lastTime = timeNow;
 	initialPosition = vec3(0, 50, -100);
 	modePosition = vec3(0, -100, -100);
 	sceneActor->SetPosition(initialPosition);
@@ -23,9 +24,12 @@ PlanetBoss::PlanetBoss(SceneActor* sceneActor, BulletsController* bulletsControl
 
 void PlanetBoss::Update(vec3 pos) {
 	if (movementTime == -1)	Reset();
-	switch (mode) 
+	auto rotationSpeed = (timeNow - lastTime) * 0.05f;
+	lastTime = timeNow;
+	sceneActor->RotateAroundUp(glm::radians(rotationSpeed));
+	switch (mode)
 	{
-	case NORMAL_MODE: 
+	case NORMAL_MODE:
 	{
 		int dTSpiral = timeNow - spiralShootTime;
 		float tmpTheta = theta;
@@ -52,16 +56,16 @@ void PlanetBoss::Update(vec3 pos) {
 			}
 			directedShootTime = timeNow;
 		}
-		if (currentHealth <= 0.5 * maximumHealth && !flag) { 
+		if (currentHealth <= 0.5 * maximumHealth && !flag) {
 			mode = WAIT_MODE;
 			waitPeriod = 2000;
 			nxtMode = MOVE1_MODE;
 			flag = true;
 			Reset();
 		}
-		break; 
+		break;
 	}
-	case MOVE1_MODE: 
+	case MOVE1_MODE:
 	{
 		int dT = timeNow - movementTime;
 		vec3 u = modePosition - sceneActor->Position();
@@ -75,8 +79,9 @@ void PlanetBoss::Update(vec3 pos) {
 		}
 		break;
 	}
-	case CRAZY_MODE: 
+	case CRAZY_MODE:
 	{
+		sceneActor->RotateAroundUp(glm::radians(10.0f));
 		int dTSpiral = timeNow - spiralShootTime;
 		float tmpTheta = theta;
 		vec3 planetPos = sceneActor->Position();
@@ -99,15 +104,15 @@ void PlanetBoss::Update(vec3 pos) {
 		}
 		break;
 	}
-	case WAIT_MODE: 
+	case WAIT_MODE:
 	{
-		if(timeNow - waitTime >= waitPeriod){
+		if (timeNow - waitTime >= waitPeriod) {
 			mode = nxtMode;
 			Reset();
 		}
 		break;
 	}
-	case MOVE2_MODE: 
+	case MOVE2_MODE:
 	{
 		if (movementTime == -1) { movementTime = timeNow; return; }
 		int dT = timeNow - movementTime;

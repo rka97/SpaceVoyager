@@ -11,3 +11,8 @@ Enemy::Enemy(SceneActor* sceneActor, BulletsController* bulletsController)
 Enemy::~Enemy()
 {
 }
+
+glm::vec3 Enemy::GetPosition()
+{
+	return sceneActor->Position();
+}
