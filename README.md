@@ -1,5 +1,5 @@
 # README
-A basic bullet hell shooter in OpenGl and C++. Usage of OOP instead of quicker data-oriented design makes it a bit slow. Models used were freely downloadable, mostly from turbosquid.
+A basic bullet hell shooter in OpenGl and C++. Usage of OOP instead of quicker data-oriented design makes it a bit slow. Models used were freely downloadable, mostly from turbosquid. Course project for Computer Graphics.
 
 # To-do
 - [ ] Make falling sharpnel.
